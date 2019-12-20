@@ -83,6 +83,7 @@ struct background
   double c_gamma_over_c_fld; /**< ppf parameter defined in eq. (16) of 0808.3125 [astro-ph] */
 
   double Omega0_ur; /**< \f$ \Omega_{0 \nu r} \f$: ultra-relativistic neutrinos */
+  double u_ur; /**< Interaction strength between massless neutrinos and DM */
 
   double Omega0_dcdmdr; /**< \f$ \Omega_{0 dcdm}+\Omega_{0 dr} \f$: decaying cold dark matter (dcdm) decaying to dark radiation (dr) */
 
@@ -107,6 +108,7 @@ struct background
   int N_ncdm;                            /**< Number of distinguishable ncdm species */
   double * M_ncdm;                       /**< vector of masses of non-cold relic:
                                              dimensionless ratios m_ncdm/T_ncdm */
+  double * u_ncdmdm;                     /**< vector of dimensionless interaction strengths, u = sigma_0/sigma_Th * (100GeV/M_dm)
   double * Omega0_ncdm, Omega0_ncdm_tot; /**< Omega0_ncdm for each species and for the total Omega0_ncdm */
   double * deg_ncdm, deg_ncdm_default;   /**< vector of degeneracy parameters in factor
                                              of p-s-d: 1 for one family of neutrinos
@@ -299,6 +301,7 @@ struct background
   short has_lambda;    /**< presence of cosmological constant? */
   short has_fld;       /**< presence of fluid with constant w and cs2? */
   short has_ur;        /**< presence of ultra-relativistic neutrinos/relics? */
+  short has_urdm_interactions; /**< Has interactions between DM and massless neutrinos */
   short has_curvature; /**< presence of global spatial curvature? */
 
   //@}
