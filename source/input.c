@@ -782,6 +782,9 @@ int input_read_parameters(
              errmsg,
              errmsg);
 
+
+
+
   /* these lines have been added for compatibility with deprecated syntax 'N_eff' instead of 'N_ur', in the future they could be suppressed */
   class_call(parser_read_double(pfc,"N_eff",&param2,&flag2,errmsg),
              errmsg,
@@ -795,6 +798,7 @@ int input_read_parameters(
     flag2 = _FALSE_;
   }
   /* end of lines for deprecated syntax */
+
 
   /* (b) try to read Omega_ur */
   class_call(parser_read_double(pfc,"Omega_ur",&param2,&flag2,errmsg),
@@ -825,6 +829,18 @@ int input_read_parameters(
     if (flag3 == _TRUE_) {
       pba->Omega0_ur = param3/pba->h/pba->h;
     }
+  }
+
+  /* try to read u_ur */
+  class_call(parser_read_double(pfc,"u_ur",&param1,&flag1,errmsg),
+             errmsg,
+             errmsg);
+
+  if (flag1 == _TRUE_ && param1 > 0) {
+    pba->has_urdm_interactions = _TRUE_;
+    pba->u_ur = param1;
+  } else {
+    pba->has_urdm_interactions = _FALSE_;
   }
 
   class_call(parser_read_double(pfc,"ceff2_ur",&param1,&flag1,errmsg),
