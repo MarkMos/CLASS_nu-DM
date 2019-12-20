@@ -1,0 +1,25 @@
+CHANGES TO CLASS v8.2.2
+--------------------------------------------------
+
+1. Background header
+------------------------------
+* add a new species of interacting DM
+l. 60:   double Omega0_nudm;
+l. 185:  int index_bg_rho_nudm;
+l. 295:  short has_nudm;
+
+2. Thermodynamics header
+------------------------------
+
+3. Perturbations header
+------------------------------
+* add nudm species to the structure "perturbs"
+
+l. 231:  short has_source_delta_nudm;
+l. 244:  short has_source_theta_nudm;
+l. 276:  int index_tp_delta_nudm;
+l. 292:  int index_tp_theta_nudm;
+
+* add nudm species to the structure "perturb_vector"
+l. 450:  int index_pt_detlta_nudm;
+l. 452:  int index_pt_theta_nudm;
