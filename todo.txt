@@ -1,0 +1,8 @@
+* In which gauges do we want to implement the interactions
+-> If it's Newtonian only we should add a check at the beginning of "perturb_init"
+
+* check output in CAMB format if there is no nudm component
+-> does it rise a segmentation fault?
+-> is there a wrongly assigend nudm column title ?
+
+* in function "perturb_vector_init"
