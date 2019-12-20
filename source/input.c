@@ -856,6 +856,24 @@ int input_read_parameters(
 
   Omega_tot += pba->Omega0_cdm;
 
+  /** - Omega_0_nudm (CDM, interacting with neutrinos) */
+  class_call(parser_read_double(pfc,"Omega_nudm",&param1,&flag1,errmsg),
+             errmsg,
+             errmsg);
+  class_call(parser_read_double(pfc,"omega_nudm",&param2,&flag2,errmsg),
+             errmsg,
+             errmsg);
+  class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
+             errmsg,
+             "In input file, you can only enter one of Omega_nudm or omega_nudm, choose one");
+  if (flag1 == _TRUE_)
+    pba->Omega0_nudm = param1;
+  if (flag2 == _TRUE_)
+    pba->Omega0_nudm = param2/pba->h/pba->h;
+
+  Omega_tot += pba->Omega0_nudm;
+  
+
   /** - Omega_0_dcdmdr (DCDM) */
   class_call(parser_read_double(pfc,"Omega_dcdmdr",&param1,&flag1,errmsg),
              errmsg,
@@ -2947,6 +2965,7 @@ int input_default_params(
   pba->Omega0_ur = 3.046*7./8.*pow(4./11.,4./3.)*pba->Omega0_g;
   pba->Omega0_b = 0.022032/pow(pba->h,2);
   pba->Omega0_cdm = 0.12038/pow(pba->h,2);
+  pba->Omega0_nudm = 0.
   pba->Omega0_dcdmdr = 0.0;
   pba->Omega0_dcdm = 0.0;
   pba->Gamma_dcdm = 0.0;
@@ -2973,7 +2992,8 @@ int input_default_params(
   pba->Omega0_k = 0.;
   pba->K = 0.;
   pba->sgnK = 0;
-  pba->Omega0_lambda = 1.-pba->Omega0_k-pba->Omega0_g-pba->Omega0_ur-pba->Omega0_b-pba->Omega0_cdm-pba->Omega0_ncdm_tot-pba->Omega0_dcdmdr;
+  pba->Omega0_lambda = 1.-pba->Omega0_k-pba->Omega0_g-pba->Omega0_ur-pba->Omega0_b-pba->Omega0_cdm-pba->Omega0_ncdm_tot-pba->Omega0_dcdmdr-\
+    pba->Omega0_nudm;
   pba->Omega0_fld = 0.;
   pba->a_today = 1.;
   pba->use_ppf = _TRUE_;

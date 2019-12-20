@@ -1,6 +1,9 @@
 CHANGES TO CLASS v8.2.2
 --------------------------------------------------
 
+A. HEADER CHANGES
+==============================
+
 1. Background header
 ------------------------------
 * add a new species of interacting DM
@@ -23,3 +26,16 @@ l. 292:  int index_tp_theta_nudm;
 * add nudm species to the structure "perturb_vector"
 l. 450:  int index_pt_detlta_nudm;
 l. 452:  int index_pt_theta_nudm;
+
+
+B. MODULE CHANGES
+==============================
+
+1. Input module
+------------------------------
+* in function "input_read_parameters"
+l. 859 ff: read in Omega_nudm or omega_nudm and assign value to pba->Omega0_nudm
+
+* in function "input_default_parameters"
+l. 2968:   pba->Omega0_nudm = 0.
+l. 2995 f: add pba->Omega0_nudm in the computation of pba->Omega0_lambda
