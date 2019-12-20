@@ -946,6 +946,14 @@ int input_read_parameters(
     /* Read interaction strength of each ncdm species: */
     class_read_list_of_doubles_or_default("u_ncdmdm",pba->u_ncdmdm,0.0,N_ncdm);
 
+    for (n = 0; n < N_ncdm; n++) {
+      if (pba->u_ncdmdm > 0) {
+        pba->has_ncdm_dm_interactions = _TRUE_;
+        break;
+      }
+      pba->has_ncdm_dm_interactions = _FALSE_;
+    }
+
     /* Read Omega of each ncdm species: */
     class_read_list_of_doubles_or_default("Omega_ncdm",pba->Omega0_ncdm,0.0,N_ncdm);
 

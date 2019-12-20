@@ -302,6 +302,7 @@ struct background
   short has_fld;       /**< presence of fluid with constant w and cs2? */
   short has_ur;        /**< presence of ultra-relativistic neutrinos/relics? */
   short has_urdm_interactions; /**< Has interactions between DM and massless neutrinos */
+  short has_ncdm_dm_interactions; /**< Has interactions between DM and massive neutrinos */
   short has_curvature; /**< presence of global spatial curvature? */
 
   //@}
