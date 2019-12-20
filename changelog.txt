@@ -108,15 +108,29 @@ l. 1244:    define index_tp_theta_nudm
 l. 3077 f:  add column titles for delta_nudm and theta_nudm
 
 * in function "perturb_vector_init"
-l 3650 f:   define index_pt_delta_dcdm and index_pt_theta_dcdm
-l 4057 f:   treat approximation swithcing for nudm component (assuming it is not affected by any approximation scheme)
+l. 3650 f:  define index_pt_delta_dcdm and index_pt_theta_dcdm
+l. 4057 f:  treat approximation swithcing for nudm component (assuming it is not affected by any approximation scheme)
 
 * in function "perturb_initial_conditions"
 l. 4689 ff: add nudm density to total matter density
 l. 4792 ff: assign initial delta_nudm in synchronous gauge (for later gauge transformation)
 -> do not include isocurvature petrurbations
+l. 5017:    if nudm is the only dm component use it to determine delta_cdm for the gauge transformation
 l. 5040 ff: assign initial conditions for delta_nudm and theta_nudm in Newtonian gauge
+
+* in function "perturb_total_stress_energy"
 l. 6055 ff: add nudm perturbations to the total stress-snergy perturbations
+
+* in function "perturb_sources"
 -> do not modify the metric potentials in synchronous gauge
 l. 6852 ff: set delta_nudm source
 l. 6957 ff: set theta_nudm source
+
+* in function "perturb_print_variables"
+l. 7106:   double delta_nudm=0., theta_nudm=0.;
+l. 7262:   assign values to the new variables
+l. 7406:   convert to netonian variables if gauge is synchronous
+l 7470 f:  store the values of delta_nudm and theta_nudm
+
+* in function "perturb_derivs"
+l. 8042 ff: time derivatived of delta_nudm and theta_nudm in Newtonian gauge (NO INTERACTIONS)

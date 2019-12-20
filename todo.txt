@@ -1,8 +1,17 @@
 * In which gauges do we want to implement the interactions
--> If it's Newtonian only we should add a check at the beginning of "perturb_init"
+-> I would advocate for Newtonian only. In this case we should:
+   - Implement at test at the beginning of perturb_init
+   - remove line 8053 in perturb_derivs: if (ppt->gauge == synchronous) dy[pv->index_pt_delta_nudm] = -metric_continuity;
+      }
+
 
 * check output in CAMB format if there is no nudm component
 -> does it rise a segmentation fault?
 -> is there a wrongly assigend nudm column title ?
 
-* in function "perturb_vector_init"
+* tests for the nudm implementation
+-> does cdm and nudm (with zero interactions) give equvalent results
+-> do 50/50 cdm and nudm (with zero interactions) give equivalent results
+
+* ur species tests and verifications
+-> does our code give equivalent results to my old implementation 

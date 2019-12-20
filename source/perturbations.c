@@ -5013,6 +5013,8 @@ int perturb_initial_conditions(struct precision * ppr,
         delta_cdm = ppw->pv->y[ppw->pv->index_pt_delta_cdm];
       else if (pba->has_dcdm == _TRUE_)
         delta_cdm = ppw->pv->y[ppw->pv->index_pt_delta_dcdm];
+      else if (pba->has_nudm == _TRUE__)
+	delta_cdm = ppw->pv->y[ppw->pv->index_pt_delta_nudm];
       else
         delta_cdm=0.;
 
@@ -7103,7 +7105,7 @@ int perturb_print_variables(double tau,
   double delta_g,theta_g,shear_g,l4_g,pol0_g,pol1_g,pol2_g,pol4_g;
   double delta_b,theta_b;
   double delta_cdm=0.,theta_cdm=0.;
-  //
+  double delta_nudm=0., theta_nudm=0.;
   double delta_dcdm=0.,theta_dcdm=0.;
   double delta_dr=0.,theta_dr=0.,shear_dr=0., f_dr=1.0;
   double delta_ur=0.,theta_ur=0.,shear_ur=0.,l4_ur=0.;
@@ -7250,7 +7252,6 @@ int perturb_print_variables(double tau,
     theta_b = y[ppw->pv->index_pt_theta_b];
 
     if (pba->has_cdm == _TRUE_) {
-
       delta_cdm = y[ppw->pv->index_pt_delta_cdm];
       if (ppt->gauge == synchronous) {
         theta_cdm = 0.;
@@ -7259,6 +7260,12 @@ int perturb_print_variables(double tau,
         theta_cdm = y[ppw->pv->index_pt_theta_cdm];
       }
     }
+
+    if (pba->has_nudm == _TRUE_) {
+      delta_nudm = y[ppw->pv->index_pt_delta_nudm];
+      theta_nudm = y[ppw->pv->index_pt_theta_nudm];
+    }
+
 
     /* gravitational potentials */
     if (ppt->gauge == synchronous) {
@@ -7398,6 +7405,12 @@ int perturb_print_variables(double tau,
         theta_cdm += k*k*alpha;
       }
 
+      if (pba->has_nudm == _TRUE_) {
+        delta_nudm -= 3. * pvecback[pba->index_bg_H]*pvecback[pba->index_bg_a]*alpha;
+        theta_nudm += k*k*alpha;
+      }
+
+      
       if (pba->has_ncdm == _TRUE_) {
         for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
           /** - --> Do gauge transformation of delta, deltaP/rho (?) and theta using -= 3aH(1+w_ncdm) alpha for delta. */
@@ -7456,6 +7469,8 @@ int perturb_print_variables(double tau,
     /* Cold dark matter */
     class_store_double(dataptr, delta_cdm, pba->has_cdm, storeidx);
     class_store_double(dataptr, theta_cdm, pba->has_cdm, storeidx);
+    class_store_double(dataptr, delta_nudm, pba->has_nudm, storeidx);
+    class_store_double(dataptr, theta_nudm, pba->has_nudm, storeidx);
     /* Non-cold Dark Matter */
     if ((pba->has_ncdm == _TRUE_) && ((ppt->has_density_transfers == _TRUE_) || (ppt->has_velocity_transfers == _TRUE_) || (ppt->has_source_delta_m == _TRUE_))) {
       for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
@@ -8024,6 +8039,16 @@ int perturb_derivs(double tau,
 
     }
 
+    if (pba->has_nudm == _TRUE_) {
+      /** - ----> newtonian gauge: nudm density and velocity */
+      if (ppt->gauge == newtonian) {
+        dy[pv->index_pt_delta_nudm] = -(y[pv->index_pt_theta_nudm]+metric_continuity); /* nudm density */
+
+        dy[pv->index_pt_theta_nudm] = - a_prime_over_a*y[pv->index_pt_theta_nudm] + metric_euler; /* nudm velocity */
+      }
+    }
+
+    
     /* perturbed recombination */
     /* computes the derivatives of delta x_e and delta T_b */
 
