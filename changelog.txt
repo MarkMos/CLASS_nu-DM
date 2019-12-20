@@ -39,3 +39,29 @@ l. 859 ff: read in Omega_nudm or omega_nudm and assign value to pba->Omega0_nudm
 * in function "input_default_parameters"
 l. 2968:   pba->Omega0_nudm = 0.
 l. 2995 f: add pba->Omega0_nudm in the computation of pba->Omega0_lambda
+
+
+2. Background module
+------------------------------
+* in function "background_functions"
+l. 323 f: compute current density of nudm according to scalefactor
+
+* in function background_w_fld
+l. 542:   add nudm species to non-relativistic matter budget
+
+* in function "background_indices"
+l. 860: pba->has_nudm = _FALSE_;
+l. 873: set pba->has_nudm to TRUE if Omega0_nudm != 0.
+l. 942: define index for index_bg_rho_nudm
+
+* in function "background_output_titles"
+l. 2222: add column title for rho_nudm
+
+* in function "background_output_data"
+l. 2282: store value of rho_nudm
+
+* in function "background_derivs"
+l. 2903 ff: add rho_nudm to the total non-relativistic matter density
+
+* in function "background_output_budget"
+l. 2579 ff: add nudm species to the matter budget
