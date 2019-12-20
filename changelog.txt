@@ -8,8 +8,12 @@ A. HEADER CHANGES
 ------------------------------
 * add a new species of interacting DM
 l. 60:   double Omega0_nudm;
+l. 86:   double u_ur;
+l. 111:  double * u_ncdmdm;
 l. 185:  int index_bg_rho_nudm;
 l. 295:  short has_nudm;
+l. 304:  short has_urdm_interactions;
+l. 305:  short has_ncdm_dm_interactions;
 
 2. Thermodynamics header
 ------------------------------
@@ -34,7 +38,9 @@ B. MODULE CHANGES
 1. Input module
 ------------------------------
 * in function "input_read_parameters"
+l. 835 ff: read in ur-DM interation strength and set interaction switch
 l. 859 ff: read in Omega_nudm or omega_nudm and assign value to pba->Omega0_nudm
+l. 965 ff: read in vector of nu-dm interaction strengths and set switch
 
 * in function "input_default_parameters"
 l. 2968:   pba->Omega0_nudm = 0.
