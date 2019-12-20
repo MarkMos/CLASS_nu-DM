@@ -1,0 +1,9 @@
+CHANGES TO CLASS v8.2.2
+--------------------------------------------------
+
+1. Background header
+------------------------------
+* add a new species of interacting DM
+l. 60:   double Omega0_nudm;
+l. 185:  int index_bg_rho_nudm;
+l. 295:  short has_nudm;
