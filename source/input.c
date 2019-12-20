@@ -927,6 +927,9 @@ int input_read_parameters(
     /* Read mass of each ncdm species: */
     class_read_list_of_doubles_or_default("m_ncdm",pba->m_ncdm_in_eV,0.0,N_ncdm);
 
+    /* Read interaction strength of each ncdm species: */
+    class_read_list_of_doubles_or_default("u_ncdmdm",pba->u_ncdmdm,0.0,N_ncdm);
+
     /* Read Omega of each ncdm species: */
     class_read_list_of_doubles_or_default("Omega_ncdm",pba->Omega0_ncdm,0.0,N_ncdm);
 
