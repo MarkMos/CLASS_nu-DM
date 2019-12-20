@@ -1023,7 +1023,7 @@ int perturb_indices_of_perturbs(
   ppt->has_source_delta_g = _FALSE_;
   ppt->has_source_delta_b = _FALSE_;
   ppt->has_source_delta_cdm = _FALSE_;
-  ppt->has_source_detla_nudm = _FALSE_;
+  ppt->has_source_delta_nudm = _FALSE_;
   ppt->has_source_delta_dcdm = _FALSE_;
   ppt->has_source_delta_fld = _FALSE_;
   ppt->has_source_delta_scf = _FALSE_;
@@ -1036,7 +1036,7 @@ int perturb_indices_of_perturbs(
   ppt->has_source_theta_g = _FALSE_;
   ppt->has_source_theta_b = _FALSE_;
   ppt->has_source_theta_cdm = _FALSE_;
-  ppt->has_source_theta_nudm = _FASLE_;
+  ppt->has_source_theta_nudm = _FALSE_;
   ppt->has_source_theta_dcdm = _FALSE_;
   ppt->has_source_theta_fld = _FALSE_;
   ppt->has_source_theta_scf = _FALSE_;
@@ -4790,7 +4790,7 @@ int perturb_initial_conditions(struct precision * ppr,
       }
 
       if (pba->has_nudm == _TRUE_){
-	ppw->pv->y[ppw->pv->index_pt_delta_nudm] = = 3./4.*ppw->pv->y[ppw->pv->index_pt_delta_g];
+	ppw->pv->y[ppw->pv->index_pt_delta_nudm] = 3./4.*ppw->pv->y[ppw->pv->index_pt_delta_g];
       }
 
       if (pba->has_dcdm == _TRUE_) {
@@ -5013,7 +5013,7 @@ int perturb_initial_conditions(struct precision * ppr,
         delta_cdm = ppw->pv->y[ppw->pv->index_pt_delta_cdm];
       else if (pba->has_dcdm == _TRUE_)
         delta_cdm = ppw->pv->y[ppw->pv->index_pt_delta_dcdm];
-      else if (pba->has_nudm == _TRUE__)
+      else if (pba->has_nudm == _TRUE_)
 	delta_cdm = ppw->pv->y[ppw->pv->index_pt_delta_nudm];
       else
         delta_cdm=0.;
@@ -6059,9 +6059,7 @@ int perturb_total_stress_energy(
       ppw->delta_rho += ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_delta_nudm];
       if (ppt->gauge == newtonian)
         ppw->rho_plus_p_theta = ppw->rho_plus_p_theta + ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_theta_nudm]; 
-
       ppw->rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_nudm];
-
       if (ppt->has_source_delta_m == _TRUE_) {
         delta_rho_m += ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_delta_nudm];
         rho_m += ppw->pvecback[pba->index_bg_rho_nudm];
@@ -6855,6 +6853,7 @@ int perturb_sources(
     if (ppt->has_source_delta_nudm == _TRUE_) {
       _set_source_(ppt->index_tp_delta_nudm) = y[ppw->pv->index_pt_delta_nudm]
         + 3.*a_prime_over_a*theta_over_k2; // N-body gauge correction
+    }
     
     /* delta_dcdm */
     if (ppt->has_source_delta_dcdm == _TRUE_) {

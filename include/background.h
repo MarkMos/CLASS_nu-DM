@@ -108,7 +108,7 @@ struct background
   int N_ncdm;                            /**< Number of distinguishable ncdm species */
   double * M_ncdm;                       /**< vector of masses of non-cold relic:
                                              dimensionless ratios m_ncdm/T_ncdm */
-  double * u_ncdmdm;                     /**< vector of dimensionless interaction strengths, u = sigma_0/sigma_Th * (100GeV/M_dm)
+  double * u_ncdmdm;                     /**< vector of dimensionless interaction strengths, u = sigma_0/sigma_Th * (100GeV/M_dm) */
   double * Omega0_ncdm, Omega0_ncdm_tot; /**< Omega0_ncdm for each species and for the total Omega0_ncdm */
   double * deg_ncdm, deg_ncdm_default;   /**< vector of degeneracy parameters in factor
                                              of p-s-d: 1 for one family of neutrinos

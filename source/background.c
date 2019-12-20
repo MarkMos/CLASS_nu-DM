@@ -326,6 +326,7 @@ int background_functions(
     rho_tot += pvecback[pba->index_bg_rho_nudm];
     p_tot += 0.;
     rho_m += pvecback[pba->index_bg_rho_nudm];
+  }
 
   /* dcdm */
   if (pba->has_dcdm == _TRUE_) {
@@ -2219,7 +2220,7 @@ int background_output_titles(struct background * pba,
   class_store_columntitle(titles,"(.)rho_g",_TRUE_);
   class_store_columntitle(titles,"(.)rho_b",_TRUE_);
   class_store_columntitle(titles,"(.)rho_cdm",pba->has_cdm);
-  class_store_columntitle(titles,"(.)rho_nudm",pba_has_nudm);
+  class_store_columntitle(titles,"(.)rho_nudm",pba->has_nudm);
   if (pba->has_ncdm == _TRUE_){
     for (n=0; n<pba->N_ncdm; n++){
       sprintf(tmp,"(.)rho_ncdm[%d]",n);
@@ -2578,7 +2579,7 @@ int background_output_budget(struct background* pba){
     }
     if(pba->has_nudm){
       _class_print_species_("nu-CDM",nudm);
-      _budget_matter+=pba->Omega0_nudm;
+      budget_matter+=pba->Omega0_nudm;
     }
     if(pba->has_dcdm){
       _class_print_species_("Decaying Dark Matter (dark g)",dcdm);

@@ -28,7 +28,7 @@ l. 276:  int index_tp_delta_nudm;
 l. 292:  int index_tp_theta_nudm;
 
 * add nudm species to the structure "perturb_vector"
-l. 450:  int index_pt_detlta_nudm;
+l. 450:  int index_pt_delta_nudm;
 l. 452:  int index_pt_theta_nudm;
 
 
