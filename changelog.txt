@@ -71,3 +71,14 @@ l. 2903 ff: add rho_nudm to the total non-relativistic matter density
 
 * in function "background_output_budget"
 l. 2579 ff: add nudm species to the matter budget
+
+3. Themodynamics module
+------------------------------
+* in function "thermodynamics_onthespot_energy_injection"
+-> do not account for the nudm species
+
+* in function "thermodynamics_energy_injection"
+-> do not account for the nudm species
+
+* in function "thermodynamics_recombination_with_hyrec"
+l. 2741: add Omega0_nudm to the matter density
