@@ -14,4 +14,13 @@
 -> do 50/50 cdm and nudm (with zero interactions) give equivalent results
 
 * ur species tests and verifications
--> does our code give equivalent results to my old implementation 
+-> does our code give equivalent results to my old implementation
+
+* implement interactions in Boltzmann equations
+-> Add interaction terms for ncdm l.8334 and on.
+-> Add interaction terms for nudm l.8040 and on.
+
+-> integration happening at l.4383
+-> integration happening at l.6128
+-> integration happening at l.7286
+Calculate integrated C_chi in perturb_total_stress_energy?

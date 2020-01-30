@@ -398,6 +398,11 @@ int background_functions(
       /** See e.g. Eq. A6 in 1811.00904. */
       dp_dloga += (pseudo_p_ncdm - 5*p_ncdm);
 
+      if (pba->has_nudm == _TRUE_) {
+        pvecback[pba->index_bg_A_nudm1+n_ncdm] = u_ncdmdm[n_ncdm]*_sigma_*_Mpc_over_m_*9.47e5* rho_ncdm/_PI_;
+        /** 9.47e5 is the factor to transform rho_{class} to rho_{phys} in units of GeV/m^3, divided by 100*/
+      }
+
       /* (3 p_ncdm1) is the "relativistic" contribution to rho_ncdm1 */
       rho_r += 3.* p_ncdm;
 
@@ -930,6 +935,7 @@ int background_indices(
   class_define_index(pba->index_bg_rho_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
   class_define_index(pba->index_bg_p_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
   class_define_index(pba->index_bg_pseudo_p_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
+  class_define_index(pba->index_bg_A_nudm1,pba->has_nudm,index_bg,pba->N_ncdm);
 
   /* - index for dcdm */
   class_define_index(pba->index_bg_rho_dcdm,pba->has_dcdm,index_bg,1);
@@ -2227,6 +2233,10 @@ int background_output_titles(struct background * pba,
       class_store_columntitle(titles,tmp,_TRUE_);
       sprintf(tmp,"(.)p_ncdm[%d]",n);
       class_store_columntitle(titles,tmp,_TRUE_);
+      if (pba->has_nudm == _TRUE_) {
+        sprintf(tmp,"(.)A_nudm[%d]",n);
+        class_store_columntitle(titles,tmp,_TRUE_);
+      }
     }
   }
   class_store_columntitle(titles,"(.)rho_lambda",pba->has_lambda);
@@ -2285,6 +2295,9 @@ int background_output_data(
       for (n=0; n<pba->N_ncdm; n++){
         class_store_double(dataptr,pvecback[pba->index_bg_rho_ncdm1+n],_TRUE_,storeidx);
         class_store_double(dataptr,pvecback[pba->index_bg_p_ncdm1+n],_TRUE_,storeidx);
+        if (pba->has_nudm == _TRUE_) {
+          class_store_double(dataptr,pvecback[pba->index_bg_A_nudm1+n],_TRUE_,storeidx);
+        }
       }
     }
     class_store_double(dataptr,pvecback[pba->index_bg_rho_lambda],pba->has_lambda,storeidx);

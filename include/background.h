@@ -204,6 +204,7 @@ struct background
   int index_bg_rho_ncdm1;     /**< density of first ncdm species (others contiguous) */
   int index_bg_p_ncdm1;       /**< pressure of first ncdm species (others contiguous) */
   int index_bg_pseudo_p_ncdm1;/**< another statistical momentum useful in ncdma approximation */
+  int index_bg_A_nudm1;       /**< momentum independent part of the interaction rate between massive neutrinos and nudm */
 
   int index_bg_rho_tot;       /**< Total density */
   int index_bg_p_tot;         /**< Total pressure */
@@ -579,6 +580,8 @@ extern "C" {
 #define _h_P_ 6.62606896e-34
 /* remark: sigma_B = 2 pi^5 k_B^4 / (15h^3c^2) = 5.670400e-8
                    = Stefan-Boltzmann constant in W/m^2/K^4 = Kg/K^4/s^3 */
+
+#define _sigma_ 6.6524616e-29 /**< Thomson cross-section in m^2 */
 
 //@}
 

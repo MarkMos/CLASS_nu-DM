@@ -11,9 +11,11 @@ l. 60:   double Omega0_nudm;
 l. 86:   double u_ur;
 l. 111:  double * u_ncdmdm;
 l. 185:  int index_bg_rho_nudm;
+l. 207:  int index_bg_A_nudm1;
 l. 295:  short has_nudm;
 l. 304:  short has_urdm_interactions;
 l. 305:  short has_ncdm_dm_interactions;
+l. 554:  #define _sigma_ 6.6524616e-29 /**< Thomson cross-section in m^2 *
 
 2. Thermodynamics header
 ------------------------------
@@ -51,6 +53,7 @@ l. 2995 f: add pba->Omega0_nudm in the computation of pba->Omega0_lambda
 ------------------------------
 * in function "background_functions"
 l. 323 f: compute current density of nudm according to scalefactor
+l. 401:   calculate A_nudm1
 
 * in function background_w_fld
 l. 542:   add nudm species to non-relativistic matter budget
@@ -58,13 +61,16 @@ l. 542:   add nudm species to non-relativistic matter budget
 * in function "background_indices"
 l. 860: pba->has_nudm = _FALSE_;
 l. 873: set pba->has_nudm to TRUE if Omega0_nudm != 0.
+l. 933: define index for index_bg_A_nudm1
 l. 942: define index for index_bg_rho_nudm
 
 * in function "background_output_titles"
 l. 2222: add column title for rho_nudm
+l. 2232: add column title for A_nudm
 
 * in function "background_output_data"
 l. 2282: store value of rho_nudm
+l. 2290: store value of A_nudm
 
 * in function "background_derivs"
 l. 2903 ff: add rho_nudm to the total non-relativistic matter density
