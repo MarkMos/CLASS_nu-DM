@@ -4059,7 +4059,7 @@ int perturb_vector_init(
 	ppv->y[ppv->index_pt_theta_nudm] = ppw->pv->y[ppw->pv->index_pt_theta_nudm];
       }
 
-      
+
       if (pba->has_dcdm == _TRUE_) {
 
         ppv->y[ppv->index_pt_delta_dcdm] =
@@ -5043,7 +5043,7 @@ int perturb_initial_conditions(struct precision * ppr,
         ppw->pv->y[ppw->pv->index_pt_delta_nudm] -= 3.*a_prime_over_a*alpha;
         ppw->pv->y[ppw->pv->index_pt_theta_nudm] = k*k*alpha;
       }
-      
+
       if (pba->has_dcdm == _TRUE_) {
         ppw->pv->y[ppw->pv->index_pt_delta_dcdm] += (-3.*a_prime_over_a - a*pba->Gamma_dcdm)*alpha;
         ppw->pv->y[ppw->pv->index_pt_theta_dcdm] = k*k*alpha;
@@ -5908,6 +5908,7 @@ int perturb_total_stress_energy(
   double rho_plus_p_ncdm;
   int index_q,n_ncdm,idx;
   double epsilon,q,q2,cg2_ncdm,w_ncdm,rho_ncdm_bg,p_ncdm_bg,pseudo_p_ncdm;
+  double C_nudm, C_nudm_int, divisor_int;
   double w_fld,dw_over_da_fld,integral_fld;
   double gwncdm;
   double rho_relativistic;
@@ -6058,7 +6059,7 @@ int perturb_total_stress_energy(
     if (pba->has_nudm == _TRUE_) {
       ppw->delta_rho += ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_delta_nudm];
       if (ppt->gauge == newtonian)
-        ppw->rho_plus_p_theta = ppw->rho_plus_p_theta + ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_theta_nudm]; 
+        ppw->rho_plus_p_theta = ppw->rho_plus_p_theta + ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_theta_nudm];
       ppw->rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_nudm];
       if (ppt->has_source_delta_m == _TRUE_) {
         delta_rho_m += ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_delta_nudm];
@@ -6071,7 +6072,7 @@ int perturb_total_stress_energy(
     }
 
 
-    
+
     /* dcdm contribution */
     if (pba->has_dcdm == _TRUE_) {
       ppw->delta_rho += ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_delta_dcdm];
@@ -6162,6 +6163,9 @@ int perturb_total_stress_energy(
           rho_plus_p_shear_ncdm = 0.0;
           delta_p_ncdm = 0.0;
           factor = pba->factor_ncdm[n_ncdm]*pow(pba->a_today/a,4);
+
+          C_nudm_int = 0;
+          divisor_int = 0;
 
           for (index_q=0; index_q < ppw->pv->q_size_ncdm[n_ncdm]; index_q ++) {
 
@@ -6854,7 +6858,7 @@ int perturb_sources(
       _set_source_(ppt->index_tp_delta_nudm) = y[ppw->pv->index_pt_delta_nudm]
         + 3.*a_prime_over_a*theta_over_k2; // N-body gauge correction
     }
-    
+
     /* delta_dcdm */
     if (ppt->has_source_delta_dcdm == _TRUE_) {
       _set_source_(ppt->index_tp_delta_dcdm) = y[ppw->pv->index_pt_delta_dcdm]
@@ -7409,7 +7413,7 @@ int perturb_print_variables(double tau,
         theta_nudm += k*k*alpha;
       }
 
-      
+
       if (pba->has_ncdm == _TRUE_) {
         for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
           /** - --> Do gauge transformation of delta, deltaP/rho (?) and theta using -= 3aH(1+w_ncdm) alpha for delta. */
@@ -8047,7 +8051,7 @@ int perturb_derivs(double tau,
       }
     }
 
-    
+
     /* perturbed recombination */
     /* computes the derivatives of delta x_e and delta T_b */
 

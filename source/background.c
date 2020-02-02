@@ -399,7 +399,7 @@ int background_functions(
       dp_dloga += (pseudo_p_ncdm - 5*p_ncdm);
 
       if (pba->has_nudm == _TRUE_) {
-        pvecback[pba->index_bg_A_nudm1+n_ncdm] = u_ncdmdm[n_ncdm]*_sigma_*_Mpc_over_m_*9.47e5* rho_ncdm/_PI_;
+        pvecback[pba->index_bg_A_nudm1+n_ncdm] = pba->u_ncdmdm[n_ncdm]*_sigma_*_Mpc_over_m_*9.47e5* rho_ncdm/_PI_;
         /** 9.47e5 is the factor to transform rho_{class} to rho_{phys} in units of GeV/m^3, divided by 100*/
       }
 
@@ -1269,6 +1269,9 @@ int background_ncdm_init(
   class_alloc(pba->w_ncdm_bg, sizeof(double*)*pba->N_ncdm,pba->error_message);
   class_alloc(pba->dlnf0_dlnq_ncdm, sizeof(double*)*pba->N_ncdm,pba->error_message);
 
+  //class_alloc(pba->C_nudm, sizeof(double*)*pba->N_ncdm,pba->error_message);
+  class_alloc(pba->f0_ncdm, sizeof(double*)*pba->N_ncdm,pba->error_message);
+
   /* Allocate pointers: */
   class_alloc(pba->q_size_ncdm,sizeof(int)*pba->N_ncdm,pba->error_message);
   class_alloc(pba->q_size_ncdm_bg,sizeof(int)*pba->N_ncdm,pba->error_message);
@@ -1405,6 +1408,12 @@ int background_ncdm_init(
     class_alloc(pba->dlnf0_dlnq_ncdm[k],
                 pba->q_size_ncdm[k]*sizeof(double),
                 pba->error_message);
+    class_alloc(pba->f0_ncdm[k],
+                pba->q_size_ncdm[k]*sizeof(double),
+                pba->error_message);
+  /*  class_alloc(pba->C_nudm[k],
+                pba->q_size_ncdm[k]*sizeof(double),
+                pba->error_message);*/
 
 
     for (index_q=0; index_q<pba->q_size_ncdm[k]; index_q++) {
@@ -1445,6 +1454,9 @@ int background_ncdm_init(
         pba->dlnf0_dlnq_ncdm[k][index_q] = -q; /* valid for whatever f0 with exponential tail in exp(-q) */
       else
         pba->dlnf0_dlnq_ncdm[k][index_q] = q/f0*df0dq;
+
+      pba->f0_ncdm[k][index_q] = f0;
+      //pba->C_nudm[k][index_q] = pba->u_ncdmdm[k]*_sigma_*_Mpc_over_m_*9.47e5* rho_ncdm*q*q/(q2+pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]*a2)/_PI_;
     }
 
     pba->factor_ncdm[k]=pba->deg_ncdm[k]*4*_PI_*pow(pba->T_cmb*pba->T_ncdm[k]*_k_B_,4)*8*_PI_*_G_

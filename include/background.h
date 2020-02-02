@@ -322,6 +322,8 @@ struct background
   double ** q_ncdm;     /**< Pointers to vectors of perturbation sampling in q */
   double ** w_ncdm;     /**< Pointers to vectors of corresponding quadrature weights w */
   double ** dlnf0_dlnq_ncdm; /**< Pointers to vectors of logarithmic derivatives of p-s-d */
+//  double ** C_nudm; /**< Pointers to vectors of momentum dependent nu-dm interaction rate */
+  double ** f0_ncdm;     /**< Pointers to vectors of distribution function sampling in q */
   int * q_size_ncdm_bg; /**< Size of the q_ncdm_bg arrays */
   int * q_size_ncdm;    /**< Size of the q_ncdm arrays */
   double * factor_ncdm; /**< List of normalization factors for calculating energy density etc.*/
