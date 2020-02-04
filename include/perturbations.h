@@ -560,6 +560,7 @@ struct perturb_workspace
   double * theta_ncdm;	/**< velocity divergence theta of each ncdm species */
   double * shear_ncdm;	/**< shear for each ncdm species */
   double * C_nudm;      /**< Integrated interaction rate between each ncdm species and nudm */
+  double * nudm_interaction_term; /**< Integrated interaction term between each ncdm species and nudm */
 
   double delta_m;	/**< relative density perturbation of all non-relativistic species */
   double theta_m;	/**< velocity divergence theta of all non-relativistic species */

@@ -37,6 +37,7 @@ l. 452:  int index_pt_theta_nudm;
 
 * add integrated interaction rate to "perturb_workspace"
 l. 562:  double * C_nudm;
+l. 563:  double * nudm_interaction_term;
 
 
 B. MODULE CHANGES
@@ -119,6 +120,9 @@ l. 1155 f:  set has_source_theta_nudm to TRUE if nudm is present -> no check for
 l. 1231:    define index_tp_delta_nudm
 l. 1244:    define index_tp_theta_nudm
 
+* in function "perturb_workspace_init"
+l. 2573:    allocate ppw->nudm_interaction_term[n_nudm] and ppw->C_nudm
+
 * in function "perturb_prepare_k_output"
 l. 3077 f:  add column titles for delta_nudm and theta_nudm
 
@@ -134,8 +138,10 @@ l. 5017:    if nudm is the only dm component use it to determine delta_cdm for t
 l. 5040 ff: assign initial conditions for delta_nudm and theta_nudm in Newtonian gauge
 
 * in function "perturb_total_stress_energy"
-l. 5911:    allocate C_nudm, C_nudm_int
-l. 6055 ff: add nudm perturbations to the total stress-snergy perturbations
+l. 5911:    allocate C_nudm, C_nudm_int, divisor_int
+l. 6055 ff: add nudm perturbations to the total stress-energy perturbations
+l. 6181:    calculate integrated nudm interactions
+l. 6214:    calculate ppw->nudm_interaction_term[n_nudm]
 
 * in function "perturb_sources"
 -> do not modify the metric potentials in synchronous gauge
@@ -149,4 +155,7 @@ l. 7406:   convert to netonian variables if gauge is synchronous
 l 7470 f:  store the values of delta_nudm and theta_nudm
 
 * in function "perturb_derivs"
-l. 8042 ff: time derivatived of delta_nudm and theta_nudm in Newtonian gauge (NO INTERACTIONS)
+l. 7713:    allocate C_nudm
+l. 8062 ff: time derivatived of delta_nudm and theta_nudm in Newtonian gauge (NO INTERACTIONS)
+l. 8068 ff: added nudm interactions
+l. 8359 ff: interaction terms for ncdm in the full Boltzmann equation

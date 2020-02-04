@@ -2570,6 +2570,8 @@ int perturb_workspace_init(
       class_alloc(ppw->delta_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->theta_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->shear_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
+      class_alloc(ppw->C_nudm,pba->N_ncdm*sizeof(double),ppt->error_message);
+      class_alloc(ppw->nudm_interaction_term,pba->N_ncdm*sizeof(double),ppt->error_message);
 
     }
 
@@ -6178,6 +6180,15 @@ int perturb_total_stress_energy(
             rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
             delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
 
+            if (pba->has_nudm == _TRUE_) {
+              C_nudm = ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]*q2/epsilon/epsilon;
+              C_nudm_int += q2*q*w_ncdm[n_ncdm][index_q]*C_nudm*(y[idx+1]
+                + y[ppw->pv->index_pt_theta_nudm]/3./k * epsilon/q *pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]);
+              divisor_int += q2*q*pba->w_ncdm[n_ncdm][index_q];
+
+            }
+
+
             //Jump to next momentum bin:
             idx+=(ppw->pv->l_max_ncdm[n_ncdm]+1);
           }
@@ -6201,6 +6212,12 @@ int perturb_total_stress_energy(
           ppw->delta_p += delta_p_ncdm;
 
           ppw->rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
+
+          if (pba->has_nudm == _TRUE_) {
+            ppw->nudm_interaction_term[n_nudm] =
+            -(ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]
+            *3./4. * C_nudm_int/divisor_int; // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
+          }
         }
       }
       if (ppt->has_source_delta_m == _TRUE_) {
@@ -7710,6 +7727,8 @@ int perturb_derivs(double tau,
   double q,epsilon,dlnf0_dlnq,qk_div_epsilon;
   double rho_ncdm_bg,p_ncdm_bg,pseudo_p_ncdm,w_ncdm,ca2_ncdm,ceff2_ncdm=0.,cvis2_ncdm=0.;
 
+  double C_nudm = 0; //allocate to 0, set to value if there is an interaction.
+
   /* for use with curvature */
   double cotKgen, sqrt_absK;
   double s2_squared, ssqrt3;
@@ -8048,6 +8067,9 @@ int perturb_derivs(double tau,
         dy[pv->index_pt_delta_nudm] = -(y[pv->index_pt_theta_nudm]+metric_continuity); /* nudm density */
 
         dy[pv->index_pt_theta_nudm] = - a_prime_over_a*y[pv->index_pt_theta_nudm] + metric_euler; /* nudm velocity */
+        if (pba->has_ncdm == _TRUE_) {
+          for (n_ncdm=0; n_ncdm<pv->N_ncdm; n_ncdm++) {
+            dy[pv->index_pt_theta_nudm] += ppw->nudm_interaction_term[n_nudm];
       }
     }
 
@@ -8354,6 +8376,10 @@ int perturb_derivs(double tau,
             epsilon = sqrt(q*q+a2*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
             qk_div_epsilon = k*q/epsilon;
 
+            if (pba->has_nudm == _TRUE_) {
+              C_nudm = pvecback[pba->index_bg_A_nudm1+n_ncdm]*q*q/epsilon/epsilon;
+            }
+
             /** - -----> ncdm density for given momentum bin */
 
             dy[idx] = -qk_div_epsilon*y[idx+1]+metric_continuity*dlnf0_dlnq/3.;
@@ -8361,17 +8387,20 @@ int perturb_derivs(double tau,
             /** - -----> ncdm velocity for given momentum bin */
 
             dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2])
-              -epsilon*metric_euler/(3*q*k)*dlnf0_dlnq;
+              -epsilon*metric_euler/(3*q*k)*dlnf0_dlnq
+              -C_nudm*(y[idx+1] + y[pv->index_pt_theta_nudm]/3./k * epsilon/q * dlnf0_dlnq); // nudm interaction term
 
             /** - -----> ncdm shear for given momentum bin */
 
             dy[idx+2] = qk_div_epsilon/5.0*(2*s_l[2]*y[idx+1]-3.*s_l[3]*y[idx+3])
-              -s_l[2]*metric_shear*2./15.*dlnf0_dlnq;
+              -s_l[2]*metric_shear*2./15.*dlnf0_dlnq
+              -0.9*C_nudm*y[idx+2];// nudm interaction term
 
             /** - -----> ncdm l>3 for given momentum bin */
 
             for(l=3; l<pv->l_max_ncdm[n_ncdm]; l++){
-              dy[idx+l] = qk_div_epsilon/(2.*l+1.0)*(l*s_l[l]*y[idx+(l-1)]-(l+1.)*s_l[l+1]*y[idx+(l+1)]);
+              dy[idx+l] = qk_div_epsilon/(2.*l+1.0)*(l*s_l[l]*y[idx+(l-1)]-(l+1.)*s_l[l+1]*y[idx+(l+1)])
+                 -C_nudm*y[idx+l];
             }
 
             /** - -----> ncdm lmax for given momentum bin (truncation as in Ma and Bertschinger)
