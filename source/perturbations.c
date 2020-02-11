@@ -6154,6 +6154,14 @@ int perturb_total_stress_energy(
 
           ppw->rho_plus_p_tot += rho_plus_p_ncdm;
 
+          if (pba->has_nudm == _TRUE_) {
+            ppw->nudm_interaction_term[n_nudm] =
+            rho_plus_p_ncdm/ppw->pvecback[pba->index_bg_rho_nudm]
+            * ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
+            * 1.52116185*pow(3*w_ncdm,0.50883507)-1.56421749*w_ncdm // Formula found by fitting
+            * (y[idx+1] - y[ppw->pv->index_pt_theta_nudm]); // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
+          }
+
           idx += ppw->pv->l_max_ncdm[n_ncdm]+1;
         }
       }
@@ -6215,7 +6223,7 @@ int perturb_total_stress_energy(
 
           if (pba->has_nudm == _TRUE_) {
             ppw->nudm_interaction_term[n_nudm] =
-            -(ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]
+            (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]
             *3./4. * C_nudm_int/divisor_int; // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
           }
         }
@@ -6976,7 +6984,7 @@ int perturb_sources(
         + theta_shift; // N-body gauge correction
     }
 
-    /* theta_cdm */
+    /* theta_nudm */
     if (ppt->has_source_theta_nudm == _TRUE_) {
       _set_source_(ppt->index_tp_theta_nudm) = y[ppw->pv->index_pt_theta_nudm]
         + theta_shift; // N-body gauge correction
@@ -8327,6 +8335,10 @@ int perturb_derivs(double tau,
           dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
             ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
             + metric_euler;
+
+          if (pba->has_nudm == _TRUE_){
+            dy[idx+1] -= ppw->nudm_interaction_term[n_nudm];
+          }
 
           /** - -----> different ansatz for approximate shear derivative */
 
