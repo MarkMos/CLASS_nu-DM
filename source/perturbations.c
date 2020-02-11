@@ -6155,7 +6155,7 @@ int perturb_total_stress_energy(
           ppw->rho_plus_p_tot += rho_plus_p_ncdm;
 
           if (pba->has_nudm == _TRUE_) {
-            ppw->nudm_interaction_term[n_nudm] =
+            ppw->nudm_interaction_term[n_ncdm] =
             rho_plus_p_ncdm/ppw->pvecback[pba->index_bg_rho_nudm]
             * ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
             * 1.52116185*pow(3*w_ncdm,0.50883507)-1.56421749*w_ncdm // Formula found by fitting
@@ -6190,7 +6190,7 @@ int perturb_total_stress_energy(
 
             if (pba->has_nudm == _TRUE_) {
               C_nudm = ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]*q2/epsilon/epsilon;
-              C_nudm_int += q2*q*w_ncdm[n_ncdm][index_q]*C_nudm*(y[idx+1]
+              C_nudm_int += q2*q*pba->w_ncdm[n_ncdm][index_q]*C_nudm*(y[idx+1]
                 + y[ppw->pv->index_pt_theta_nudm]/3./k * epsilon/q *pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]);
               divisor_int += q2*q*pba->w_ncdm[n_ncdm][index_q];
 
@@ -6222,7 +6222,7 @@ int perturb_total_stress_energy(
           ppw->rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
 
           if (pba->has_nudm == _TRUE_) {
-            ppw->nudm_interaction_term[n_nudm] =
+            ppw->nudm_interaction_term[n_ncdm] =
             (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]
             *3./4. * C_nudm_int/divisor_int; // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
           }
@@ -8077,7 +8077,9 @@ int perturb_derivs(double tau,
         dy[pv->index_pt_theta_nudm] = - a_prime_over_a*y[pv->index_pt_theta_nudm] + metric_euler; /* nudm velocity */
         if (pba->has_ncdm == _TRUE_) {
           for (n_ncdm=0; n_ncdm<pv->N_ncdm; n_ncdm++) {
-            dy[pv->index_pt_theta_nudm] += ppw->nudm_interaction_term[n_nudm];
+            dy[pv->index_pt_theta_nudm] += ppw->nudm_interaction_term[n_ncdm];
+          }
+        }
       }
     }
 
@@ -8337,7 +8339,7 @@ int perturb_derivs(double tau,
             + metric_euler;
 
           if (pba->has_nudm == _TRUE_){
-            dy[idx+1] -= ppw->nudm_interaction_term[n_nudm];
+            dy[idx+1] -= ppw->nudm_interaction_term[n_ncdm];
           }
 
           /** - -----> different ansatz for approximate shear derivative */
@@ -9053,7 +9055,7 @@ int perturb_rsa_delta_and_theta(
                                 double a_prime_over_a,
                                 double * pvecthermo,
                                 struct perturb_workspace * ppw
-                                ) {
+                              ) {
   /* - define local variables */
 
   double k2;
