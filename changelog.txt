@@ -166,4 +166,4 @@ C. PYTHON CHANGES
 ==============================
 1. Setup.py
 l. 38: added "/usr/include"
-l. 40: "/usr/lib/x86_64-linux-gnu"
+l. 40: added "/usr/lib/x86_64-linux-gnu"

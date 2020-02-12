@@ -647,6 +647,8 @@ int perturb_init(
 
   }
 
+  //printf("Tests done\n"); //debug
+
 
 
   /** - define the common time sampling for all sources using
@@ -658,6 +660,8 @@ int perturb_init(
                                               ppt),
              ppt->error_message,
              ppt->error_message);
+
+  //printf("Timesampling done\n"); //debug
 
   /** - if we want to store perturbations for given k values, write titles and allocate storage */
 
@@ -757,6 +761,7 @@ int perturb_init(
 #ifdef _OPENMP
           tstart = omp_get_wtime();
 #endif
+//printf("Solve starting\n"); //debug
 
           class_call_parallel(perturb_solve(ppr,
                                             pba,
@@ -777,6 +782,7 @@ int perturb_init(
 
 #pragma omp flush(abort)
 
+//printf("solve done\n"); //debug
         } /* end of loop over wavenumbers */
 
 #ifdef _OPENMP
@@ -815,6 +821,7 @@ int perturb_init(
   } /* end loop over modes */
 
   free(pppw);
+  //printf("free done\n"); //debug
 
   /** - spline the source array with respect to the time variable */
 
@@ -858,6 +865,7 @@ int perturb_init(
     } /* end of loop over mode */
 
   }
+  printf("all done\n"); //debug
 
   return _SUCCESS_;
 }
@@ -2739,6 +2747,8 @@ int perturb_solve(
   /** - using bisection, compute minimum value of tau for which this
       wavenumber is integrated */
 
+  //printf("solve start done\n"); //debug
+
   /* will be at least the first time in the background table */
   tau_lower = pba->tau_table[0];
 
@@ -2751,6 +2761,8 @@ int perturb_solve(
              pba->error_message,
              ppt->error_message);
 
+  //printf("solve bg done\n"); //debug
+
   class_call(thermodynamics_at_z(pba,
                                  pth,
                                  1./ppw->pvecback[pba->index_bg_a]-1.,
@@ -2760,6 +2772,8 @@ int perturb_solve(
                                  ppw->pvecthermo),
              pth->error_message,
              ppt->error_message);
+
+    //printf("solve th done\n"); //debug
 
   /* check that this initial time is indeed OK given imposed
      conditions on kappa' and on k/aH */
@@ -2789,6 +2803,8 @@ int perturb_solve(
                  ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]);
     }
   }
+
+  //printf("solve tests done\n"); //debug
 
   /* is at most the time at which sources must be sampled */
   tau_upper = ppt->tau_sampling[0];
@@ -2849,6 +2865,8 @@ int perturb_solve(
 
   }
 
+  //printf("solve bisection done\n"); //debug
+
   tau = tau_mid;
 
   /** - find the number of intervals over which approximation scheme is constant */
@@ -2897,6 +2915,8 @@ int perturb_solve(
 
   free(interval_number_of);
 
+  //printf("solve approx done\n"); //debug
+
   /** - fill the structure containing all fixed parameters, indices
       and workspaces needed by perturb_derivs */
 
@@ -2912,6 +2932,8 @@ int perturb_solve(
   ppaw.ppw->inter_mode = pba->inter_closeby;
   ppaw.ppw->last_index_back = 0;
   ppaw.ppw->last_index_thermo = 0;
+
+  //printf("solve workspace done 1\n"); //debug
 
   /** - check whether we need to print perturbations to a file for this wavenumber */
 
@@ -2966,6 +2988,7 @@ int perturb_solve(
                ppt->error_message,
                ppt->error_message);
 
+    //printf("solve vector init done\n"); //debug
     /** - --> (d) integrate the perturbations over the current interval. */
 
     if(ppr->evolver == rk){
@@ -2996,6 +3019,8 @@ int perturb_solve(
 
   }
 
+  //printf("solve evolver done\n"); //debug
+
   /** - if perturbations were printed in a file, close the file */
 
   //if (perhaps_print_variables != NULL)
@@ -3024,6 +3049,8 @@ int perturb_solve(
   free(interval_approx);
 
   free(interval_limit);
+
+  //printf("solve free done\n"); //debug
 
   return _SUCCESS_;
 }
@@ -7687,7 +7714,7 @@ int perturb_derivs(double tau,
   /** Summary: */
 
   /** - define local variables */
-
+  //printf("derivs started\n"); //debug
   /* multipole */
   int l;
 
@@ -7763,6 +7790,8 @@ int perturb_derivs(double tau,
   pvecmetric = ppw->pvecmetric;
   pv = ppw->pv;
 
+  //printf("derivs define done\n"); //debug
+
   /** - get background/thermo quantities in this point */
 
   class_call(background_at_tau(pba,
@@ -7796,6 +7825,8 @@ int perturb_derivs(double tau,
                               ppw),
              ppt->error_message,
              error_message);
+
+  //printf("derivs einstein done\n"); //debug
 
   /** - compute related background quantities */
 
@@ -7911,7 +7942,7 @@ int perturb_derivs(double tau,
       delta_g = ppw->rsa_delta_g;
       theta_g = ppw->rsa_theta_g;
     }
-
+//printf("derivs before evolution done\n"); //debug
     /** - --> (e) BEGINNING OF ACTUAL SYSTEM OF EQUATIONS OF EVOLUTION */
 
     /** - ---> photon temperature density */
@@ -8284,7 +8315,7 @@ int perturb_derivs(double tau,
         }
       }
     }
-
+    //printf("derivs before ncdm done\n"); //debug
     /** - ---> non-cold dark matter (ncdm): massive neutrinos, WDM, etc. */
     //TBC: curvature in all ncdm
     if (pba->has_ncdm == _TRUE_) {
@@ -8294,6 +8325,7 @@ int perturb_derivs(double tau,
       /** - ----> first case: use a fluid approximation (ncdmfa) */
       //TBC: curvature
       if(ppw->approx[ppw->index_ap_ncdmfa] == (int)ncdmfa_on) {
+        //printf("fluid approx\n"); //debug
 
         /** - -----> loop over species */
 
@@ -8338,9 +8370,11 @@ int perturb_derivs(double tau,
             ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
             + metric_euler;
 
+          //printf("ncdm before nudm\n"); //debug
           if (pba->has_nudm == _TRUE_){
             dy[idx+1] -= ppw->nudm_interaction_term[n_ncdm];
           }
+          //printf("ncdm nudm int done\n"); //debug
 
           /** - -----> different ansatz for approximate shear derivative */
 
@@ -8374,6 +8408,7 @@ int perturb_derivs(double tau,
       /** - ----> second case: use exact equation (Boltzmann hierarchy on momentum grid) */
 
       else {
+        //printf("ncdm no approx\n"); //debug
 
         /** - -----> loop over species */
 
@@ -8393,22 +8428,30 @@ int perturb_derivs(double tau,
             if (pba->has_nudm == _TRUE_) {
               C_nudm = pvecback[pba->index_bg_A_nudm1+n_ncdm]*q*q/epsilon/epsilon;
             }
-
+            //printf("C_nudm done\n"); //debug
             /** - -----> ncdm density for given momentum bin */
 
             dy[idx] = -qk_div_epsilon*y[idx+1]+metric_continuity*dlnf0_dlnq/3.;
 
+            //printf("psi1 done\n"); //debug
             /** - -----> ncdm velocity for given momentum bin */
 
             dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2])
-              -epsilon*metric_euler/(3*q*k)*dlnf0_dlnq
-              -C_nudm*(y[idx+1] + y[pv->index_pt_theta_nudm]/3./k * epsilon/q * dlnf0_dlnq); // nudm interaction term
+              -epsilon*metric_euler/(3*q*k)*dlnf0_dlnq;
 
+              if (pba->has_nudm == _TRUE_) {
+                dy[idx+1] += -C_nudm*(y[idx+1] + y[pv->index_pt_theta_nudm]/3./k * epsilon/q * dlnf0_dlnq); // nudm interaction term
+              }
+
+
+            //printf("psi2 done\n"); //debug
             /** - -----> ncdm shear for given momentum bin */
 
             dy[idx+2] = qk_div_epsilon/5.0*(2*s_l[2]*y[idx+1]-3.*s_l[3]*y[idx+3])
               -s_l[2]*metric_shear*2./15.*dlnf0_dlnq
               -0.9*C_nudm*y[idx+2];// nudm interaction term
+
+            //printf("psi3 done\n"); //debug
 
             /** - -----> ncdm l>3 for given momentum bin */
 
@@ -8416,6 +8459,8 @@ int perturb_derivs(double tau,
               dy[idx+l] = qk_div_epsilon/(2.*l+1.0)*(l*s_l[l]*y[idx+(l-1)]-(l+1.)*s_l[l+1]*y[idx+(l+1)])
                  -C_nudm*y[idx+l];
             }
+
+            //printf("l 1-3 done\n"); //debug
 
             /** - -----> ncdm lmax for given momentum bin (truncation as in Ma and Bertschinger)
                 but with curvature taken into account a la arXiv:1305.3261 */
@@ -8429,7 +8474,7 @@ int perturb_derivs(double tau,
         }
       }
     }
-
+    //printf("derivs ncdm done\n"); //debug
     /** - ---> metric */
 
     /** - ---> eta of synchronous gauge */
@@ -8750,6 +8795,7 @@ int perturb_derivs(double tau,
     dy[pv->index_pt_gwdot] = pvecmetric[ppw->index_mt_gw_prime_prime];
 
   }
+  //printf("derivs done\n"); //debug
 
   return _SUCCESS_;
 }
