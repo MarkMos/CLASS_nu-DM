@@ -153,7 +153,7 @@ l. 6957 ff: set theta_nudm source
 l. 7106:   double delta_nudm=0., theta_nudm=0.;
 l. 7262:   assign values to the new variables
 l. 7406:   convert to netonian variables if gauge is synchronous
-l 7470 f:  store the values of delta_nudm and theta_nudm
+l. 7470 f:  store the values of delta_nudm and theta_nudm
 
 * in function "perturb_derivs"
 l. 7713:    allocate C_nudm
@@ -161,3 +161,9 @@ l. 8062 ff: time derivatived of delta_nudm and theta_nudm in Newtonian gauge (NO
 l. 8068 ff: added nudm interactions
 l. 8339 ff: interaction term for ncdm in fluid approximation
 l. 8359 ff: interaction terms for ncdm in the full Boltzmann equation
+
+C. PYTHON CHANGES
+==============================
+1. Setup.py
+l. 38: added "/usr/include"
+l. 40: "/usr/lib/x86_64-linux-gnu"

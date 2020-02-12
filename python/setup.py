@@ -35,9 +35,9 @@ with open(os.path.join(include_folder, 'common.h'), 'r') as v_file:
 
 # Define cython extension and fix Python version
 classy_ext = Extension("classy", [os.path.join(classy_folder, "classy.pyx")],
-                           include_dirs=[nm.get_include(), include_folder],
+                           include_dirs=[nm.get_include(), include_folder, "/usr/include"],
                            libraries=liblist,
-                           library_dirs=[root_folder, GCCPATH],
+                           library_dirs=[root_folder, GCCPATH, "/usr/lib/x86_64-linux-gnu"],
                            extra_link_args=['-lgomp'])
 import six
 classy_ext.cython_directives = {'language_level': "3" if six.PY3 else "2"}
