@@ -400,9 +400,9 @@ int background_functions(
 
       if (pba->has_nudm == _TRUE_) {
         pvecback[pba->index_bg_A_nudm1+n_ncdm] = pba->u_ncdmdm[n_ncdm]*_sigma_*_Mpc_over_m_*9.47e5* rho_ncdm/_PI_;
-        if (pvecback[pba->index_bg_A_nudm1+n_ncdm]!=0) {
-          printf("interaction strength = %f\n", pvecback[pba->index_bg_A_nudm1+n_ncdm]); //debug
-        }
+        //if (pvecback[pba->index_bg_A_nudm1+n_ncdm]!=0) {
+        //  printf("interaction strength = %f\n", pvecback[pba->index_bg_A_nudm1+n_ncdm]); //debug
+        //}
 
         /** 9.47e5 is the factor to transform rho_{class} to rho_{phys} in units of GeV/m^3, divided by 100*/
       }

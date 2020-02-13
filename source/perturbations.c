@@ -745,7 +745,7 @@ int perturb_init(
   private(index_k,thread,tstart,tstop,tspent)                           \
   num_threads(number_of_threads)
 
-      { printf("beginning parallel area\n");//debug
+      { //printf("beginning parallel area\n");//debug
 
 #ifdef _OPENMP
         thread=omp_get_thread_num();
@@ -2589,7 +2589,7 @@ int perturb_workspace_init(
       class_alloc(ppw->shear_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->C_nudm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->nudm_interaction_term,pba->N_ncdm*sizeof(double),ppt->error_message);
-      printf("nudm_interaction_term allocated\n");
+      //printf("nudm_interaction_term allocated\n"); //debug
 
     }
 
@@ -3033,7 +3033,7 @@ int perturb_solve(
 
   }
 
-  printf("solve evolver done\n"); //debug
+  //printf("solve evolver done\n"); //debug
 
   /** - if perturbations were printed in a file, close the file */
 
