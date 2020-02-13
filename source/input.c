@@ -888,7 +888,7 @@ int input_read_parameters(
     pba->Omega0_nudm = param2/pba->h/pba->h;
 
   Omega_tot += pba->Omega0_nudm;
-  
+
 
   /** - Omega_0_dcdmdr (DCDM) */
   class_call(parser_read_double(pfc,"Omega_dcdmdr",&param1,&flag1,errmsg),
@@ -965,8 +965,9 @@ int input_read_parameters(
     class_read_list_of_doubles_or_default("u_ncdmdm",pba->u_ncdmdm,0.0,N_ncdm);
 
     for (n = 0; n < N_ncdm; n++) {
-      if (pba->u_ncdmdm > 0) {
+      if (pba->u_ncdmdm[n] > 0) {
         pba->has_ncdm_dm_interactions = _TRUE_;
+        //printf("has interactions\n"); //debug
         break;
       }
       pba->has_ncdm_dm_interactions = _FALSE_;

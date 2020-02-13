@@ -255,7 +255,7 @@ int perturb_output_data(
           class_store_double(dataptr,tk[ppt->index_tp_theta_g],ppt->has_source_theta_g,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_theta_b],ppt->has_source_theta_b,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_theta_cdm],ppt->has_source_theta_cdm,storeidx);
-	  class_store_double(dataptr,tk[ppt->index_tp_theta_nudm],ppt->has_source_theta_nudm,storeidx);
+	        class_store_double(dataptr,tk[ppt->index_tp_theta_nudm],ppt->has_source_theta_nudm,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_theta_fld],ppt->has_source_theta_fld,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_theta_ur],ppt->has_source_theta_ur,storeidx);
           if (pba->has_ncdm == _TRUE_){
@@ -542,6 +542,12 @@ int perturb_init(
 
   }
 
+  if (pba->has_nudm == _TRUE_ && pba->has_ncdm == _TRUE_) {
+    class_test( (ppt->has_density_transfers == _FALSE_) && (ppt->has_velocity_transfers == _FALSE_) && (ppt->has_source_delta_m == _FALSE_),
+                ppt->error_message,
+                "when using nudm and ncdm, you must have density transfers, velocity transfers or source_delta_m")
+  }
+
   if (pba->has_fld == _TRUE_) {
 
     /* check values of w_fld at initial time and today */
@@ -725,6 +731,7 @@ int perturb_init(
     /** - --> (c) loop over initial conditions and wavenumbers; for each of them, evolve perturbations and compute source functions with perturb_solve() */
 
     for (index_ic = 0; index_ic < ppt->ic_size[index_md]; index_ic++) {
+      printf("beginning initial condition\n");//debug
 
       if (ppt->perturbations_verbose > 1) {
         printf("Evolving ic %d/%d\n",index_ic+1,ppt->ic_size[index_md]);
@@ -738,7 +745,7 @@ int perturb_init(
   private(index_k,thread,tstart,tstop,tspent)                           \
   num_threads(number_of_threads)
 
-      {
+      { printf("beginning parallel area\n");//debug
 
 #ifdef _OPENMP
         thread=omp_get_thread_num();
@@ -782,9 +789,9 @@ int perturb_init(
 
 #pragma omp flush(abort)
 
-//printf("solve done\n"); //debug
-        } /* end of loop over wavenumbers */
 
+        } /* end of loop over wavenumbers */
+printf("solve done\n"); //debug
 #ifdef _OPENMP
         if (ppt->perturbations_verbose>1)
           printf("In %s: time spent in parallel region (loop over k's) = %e s for thread %d\n",
@@ -792,10 +799,11 @@ int perturb_init(
 #endif
 
       } /* end of parallel region */
-
+printf("parallel region done\n");//debug
       if (abort == _TRUE_) return _FAILURE_;
 
     } /* end of loop over initial conditions */
+    printf("initial conditions done\n"); //debug
 
     abort = _FALSE_;
 
@@ -1125,14 +1133,15 @@ int perturb_indices_of_perturbs(
       }
 
       if (ppt->has_density_transfers == _TRUE_) {
+        printf("has density transfers\n");
         ppt->has_lss = _TRUE_;
         ppt->has_source_delta_tot = _TRUE_;
         ppt->has_source_delta_g = _TRUE_;
         ppt->has_source_delta_b = _TRUE_;
         if (pba->has_cdm == _TRUE_)
           ppt->has_source_delta_cdm = _TRUE_;
-	if (pba->has_nudm == _TRUE_)
-	  ppt->has_source_delta_nudm = _TRUE_;
+	      if (pba->has_nudm == _TRUE_)
+	        ppt->has_source_delta_nudm = _TRUE_;
         if (pba->has_dcdm == _TRUE_)
           ppt->has_source_delta_dcdm = _TRUE_;
         if (pba->has_fld == _TRUE_)
@@ -2580,6 +2589,7 @@ int perturb_workspace_init(
       class_alloc(ppw->shear_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->C_nudm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->nudm_interaction_term,pba->N_ncdm*sizeof(double),ppt->error_message);
+      printf("nudm_interaction_term allocated\n");
 
     }
 
@@ -2618,6 +2628,8 @@ int perturb_workspace_free (
       free(ppw->delta_ncdm);
       free(ppw->theta_ncdm);
       free(ppw->shear_ncdm);
+      free(ppw->C_nudm);
+      free(ppw->nudm_interaction_term);
     }
   }
 
@@ -2998,6 +3010,8 @@ int perturb_solve(
       generic_evolver = evolver_ndf15;
     }
 
+    //printf("calling evolver\n"); //debug
+
     class_call(generic_evolver(perturb_derivs,
                                interval_limit[index_interval],
                                interval_limit[index_interval+1],
@@ -3019,7 +3033,7 @@ int perturb_solve(
 
   }
 
-  //printf("solve evolver done\n"); //debug
+  printf("solve evolver done\n"); //debug
 
   /** - if perturbations were printed in a file, close the file */
 
@@ -5740,11 +5754,12 @@ int perturb_einstein(
   a_prime_over_a = ppw->pvecback[pba->index_bg_H]*a;
   s2_squared = 1.-3.*pba->K/k2;
 
+  //printf("einstein started\n"); //debug
   /** - sum up perturbations from all species */
   class_call(perturb_total_stress_energy(ppr,pba,pth,ppt,index_md,k,y,ppw),
              ppt->error_message,
              ppt->error_message);
-
+  //printf("einstein stress_energy done started\n"); //debug
   /** - for scalar modes: */
 
   if (_scalars_) {
@@ -5953,7 +5968,7 @@ int perturb_total_stress_energy(
   double X, Y, Z, X_prime, Y_prime, Z_prime;
   double Gamma_fld, S, S_prime, theta_t, theta_t_prime, rho_plus_p_theta_fld_prime;
   double delta_p_b_over_rho_b;
-
+  //printf("stress_energy started\n"); //debug
   /** - wavenumber and scale factor related quantities */
 
   a = ppw->pvecback[pba->index_bg_a];
@@ -6084,6 +6099,8 @@ int perturb_total_stress_energy(
       }
     }
 
+    //printf("stress_energy everything before nudm done\n"); //debug
+
     /* nudm contribution */
     if (pba->has_nudm == _TRUE_) {
       ppw->delta_rho += ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_delta_nudm];
@@ -6099,6 +6116,8 @@ int perturb_total_stress_energy(
         rho_plus_p_m += ppw->pvecback[pba->index_bg_rho_nudm];
       }
     }
+
+    //printf("stress_energy nudm done\n"); //debug
 
 
 
@@ -6155,11 +6174,14 @@ int perturb_total_stress_energy(
         ((ppt->has_source_delta_cb == _TRUE_) || (ppt->has_source_theta_cb == _TRUE_)))
       ppw->theta_cb = rho_plus_p_theta_m/rho_plus_p_m;
 
+
+      //printf("stress_energy everything before ncdm done\n"); //debug
     /* non-cold dark matter contribution */
     if (pba->has_ncdm == _TRUE_) {
       idx = ppw->pv->index_pt_psi0_ncdm1;
       if(ppw->approx[ppw->index_ap_ncdmfa] == (int)ncdmfa_on){
         // The perturbations are evolved integrated:
+        //printf("stress_energy ncdm fluid\n"); //debug
         for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
           rho_ncdm_bg = ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
           p_ncdm_bg = ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
@@ -6181,18 +6203,33 @@ int perturb_total_stress_energy(
 
           ppw->rho_plus_p_tot += rho_plus_p_ncdm;
 
-          if (pba->has_nudm == _TRUE_) {
-            ppw->nudm_interaction_term[n_ncdm] =
-            rho_plus_p_ncdm/ppw->pvecback[pba->index_bg_rho_nudm]
-            * ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
-            * 1.52116185*pow(3*w_ncdm,0.50883507)-1.56421749*w_ncdm // Formula found by fitting
-            * (y[idx+1] - y[ppw->pv->index_pt_theta_nudm]); // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
+
+          if ((ppt->has_source_delta_ncdm == _TRUE_) || (ppt->has_source_theta_ncdm == _TRUE_) || (ppt->has_source_delta_m == _TRUE_)) {
+            if (pba->has_nudm == _TRUE_) {
+              ppw->nudm_interaction_term[n_ncdm] =
+              rho_plus_p_ncdm/ppw->pvecback[pba->index_bg_rho_nudm]
+              * ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
+              * (1.52116185*pow(3*w_ncdm,0.50883507)-1.56421749*w_ncdm) // Formula found by fitting
+              * (y[idx+1] - y[ppw->pv->index_pt_theta_nudm]); // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
+
+              //printf("term 1 = %f, term 2  %f, term 3\n", );
+
+
+              /*printf("nudm interaction term defined as %f calculated as %f A=%f\n", ppw->nudm_interaction_term[n_ncdm],
+              rho_plus_p_ncdm/ppw->pvecback[pba->index_bg_rho_nudm]
+              * ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
+              * (1.52116185*pow(3*w_ncdm,0.50883507)-1.56421749*w_ncdm)
+              * (y[idx+1] - y[ppw->pv->index_pt_theta_nudm]),
+              ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]);*/
+            }
           }
+
 
           idx += ppw->pv->l_max_ncdm[n_ncdm]+1;
         }
       }
       else{
+        //printf("stress_energy ncdm not fluid\n"); //debug
         // We must integrate to find perturbations:
         for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
           rho_delta_ncdm = 0.0;
@@ -6203,6 +6240,7 @@ int perturb_total_stress_energy(
 
           C_nudm_int = 0;
           divisor_int = 0;
+          //printf("stress_energy ncdm not fluid before integration\n"); //debug
 
           for (index_q=0; index_q < ppw->pv->q_size_ncdm[n_ncdm]; index_q ++) {
 
@@ -6228,6 +6266,8 @@ int perturb_total_stress_energy(
             idx+=(ppw->pv->l_max_ncdm[n_ncdm]+1);
           }
 
+        //  printf("stress_energy ncdm not fluid integration done\n"); //debug
+
           rho_delta_ncdm *= factor;
           rho_plus_p_theta_ncdm *= k*factor;
           rho_plus_p_shear_ncdm *= 2.0/3.0*factor;
@@ -6247,12 +6287,17 @@ int perturb_total_stress_energy(
           ppw->delta_p += delta_p_ncdm;
 
           ppw->rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
-
-          if (pba->has_nudm == _TRUE_) {
-            ppw->nudm_interaction_term[n_ncdm] =
-            (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]
-            *3./4. * C_nudm_int/divisor_int; // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
+          //printf("stress_energy ncdm not fluid saving interaction term\n"); //debug
+          if ((ppt->has_source_delta_ncdm == _TRUE_) || (ppt->has_source_theta_ncdm == _TRUE_) || (ppt->has_source_delta_m == _TRUE_)) {
+            if (pba->has_nudm == _TRUE_) {
+              ppw->nudm_interaction_term[n_ncdm] =
+              (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]
+              *3./4. * C_nudm_int/divisor_int; // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
+              //printf("nudm interaction term defined as %f, calculated as %f\n",ppw->nudm_interaction_term[n_ncdm],
+              //       (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]*3./4. * C_nudm_int/divisor_int); //debug
+            }
           }
+          //printf("stress_energy ncdm not fluid saved interaction term\n"); //debug
         }
       }
       if (ppt->has_source_delta_m == _TRUE_) {
@@ -6269,6 +6314,8 @@ int perturb_total_stress_energy(
         }
       }
     }
+
+    //printf("stress_energy ncdm done\n"); //debug
 
     /* scalar field contribution.
        In Newtonian gauge, delta_scf depends on the metric perturbation psi which is inferred
@@ -7803,6 +7850,8 @@ int perturb_derivs(double tau,
              pba->error_message,
              error_message);
 
+  //printf("derivs bg done\n"); //debug
+
   class_call(thermodynamics_at_z(pba,
                                  pth,
                                  1./pvecback[pba->index_bg_a]-1.,  /* redshift z=1/a-1 */
@@ -7812,6 +7861,7 @@ int perturb_derivs(double tau,
                                  pvecthermo),
              pth->error_message,
              error_message);
+  //printf("derivs th done\n"); //debug
 
   /** - get metric perturbations with perturb_einstein() */
   class_call(perturb_einstein(ppr,
@@ -8100,12 +8150,15 @@ int perturb_derivs(double tau,
 
     }
 
+    //printf("derivs before nudm\n"); //debug
+
     if (pba->has_nudm == _TRUE_) {
       /** - ----> newtonian gauge: nudm density and velocity */
       if (ppt->gauge == newtonian) {
         dy[pv->index_pt_delta_nudm] = -(y[pv->index_pt_theta_nudm]+metric_continuity); /* nudm density */
 
         dy[pv->index_pt_theta_nudm] = - a_prime_over_a*y[pv->index_pt_theta_nudm] + metric_euler; /* nudm velocity */
+        //printf("derivs nudm before ncdm term\n"); //debug
         if (pba->has_ncdm == _TRUE_) {
           for (n_ncdm=0; n_ncdm<pv->N_ncdm; n_ncdm++) {
             dy[pv->index_pt_theta_nudm] += ppw->nudm_interaction_term[n_ncdm];
@@ -8113,6 +8166,8 @@ int perturb_derivs(double tau,
         }
       }
     }
+
+  //  printf("derivs einstein nudm done\n"); //debug
 
 
     /* perturbed recombination */
@@ -8318,6 +8373,8 @@ int perturb_derivs(double tau,
     //printf("derivs before ncdm done\n"); //debug
     /** - ---> non-cold dark matter (ncdm): massive neutrinos, WDM, etc. */
     //TBC: curvature in all ncdm
+
+    //printf("derivs einstein before ncdm\n"); //debug
     if (pba->has_ncdm == _TRUE_) {
 
       idx = pv->index_pt_psi0_ncdm1;
@@ -8372,6 +8429,7 @@ int perturb_derivs(double tau,
 
           //printf("ncdm before nudm\n"); //debug
           if (pba->has_nudm == _TRUE_){
+            //printf("ncdm nudm interaction term = %f\n", ppw->nudm_interaction_term[n_ncdm]); //debug
             dy[idx+1] -= ppw->nudm_interaction_term[n_ncdm];
           }
           //printf("ncdm nudm int done\n"); //debug
@@ -8441,6 +8499,7 @@ int perturb_derivs(double tau,
 
               if (pba->has_nudm == _TRUE_) {
                 dy[idx+1] += -C_nudm*(y[idx+1] + y[pv->index_pt_theta_nudm]/3./k * epsilon/q * dlnf0_dlnq); // nudm interaction term
+                //printf("ncdm nudm interaction term (inintegrated) = %f\n", -C_nudm*(y[idx+1] + y[pv->index_pt_theta_nudm]/3./k * epsilon/q * dlnf0_dlnq)); //debug
               }
 
 
@@ -8474,6 +8533,8 @@ int perturb_derivs(double tau,
         }
       }
     }
+
+    //printf("derivs einstein ncdm done\n"); //debug
     //printf("derivs ncdm done\n"); //debug
     /** - ---> metric */
 

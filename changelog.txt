@@ -112,6 +112,9 @@ l. 349:   store column title t_nudm
 l. 369:   store column title for CAMB format	-> I AM NOT 100% SURE ABOUT THE IMPLEMENTATION
    	  	       	     	      		-> CHECK OUTPUT WO/ nudm COMPONENT
 
+* in function "perturb_init"
+l. 545 f: test if required transfers are available for nudm-ncdm interaction
+
 * in function "perturb_indices_of_perturb"
 l. 1026:    ppt->has_source_detla_nudm = _FALSE_; (initialisation)
 l. 1039:    ppt->has_source_theta_nudm = _FASLE_; (initialisation)
