@@ -7810,6 +7810,7 @@ int perturb_derivs(double tau,
   double rho_ncdm_bg,p_ncdm_bg,pseudo_p_ncdm,w_ncdm,ca2_ncdm,ceff2_ncdm=0.,cvis2_ncdm=0.;
 
   double C_nudm = 0; //allocate to 0, set to value if there is an interaction.
+  double sigma_term = 0;
 
   /* for use with curvature */
   double cotKgen, sqrt_absK;
@@ -8431,6 +8432,8 @@ int perturb_derivs(double tau,
           if (pba->has_nudm == _TRUE_){
             //printf("ncdm nudm interaction term = %f\n", ppw->nudm_interaction_term[n_ncdm]); //debug
             dy[idx+1] -= ppw->nudm_interaction_term[n_ncdm];
+            sigma_term = ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
+            * (1.52116185*pow(3*w_ncdm,0.50883507)-1.56421749*w_ncdm)* y[idx+2];
           }
           //printf("ncdm nudm int done\n"); //debug
 
@@ -8439,21 +8442,24 @@ int perturb_derivs(double tau,
           if (ppr->ncdm_fluid_approximation == ncdmfa_mb) {
 
             dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau)*y[idx+2]
-              +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*s_l[2]*(y[idx+1]+metric_shear);
+              +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*s_l[2]*(y[idx+1]+metric_shear)
+              - sigma_term;
 
           }
 
           if (ppr->ncdm_fluid_approximation == ncdmfa_hu) {
 
             dy[idx+2] = -3.0*a_prime_over_a*ca2_ncdm/w_ncdm*y[idx+2]
-              +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*s_l[2]*(y[idx+1]+metric_shear);
+              +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*s_l[2]*(y[idx+1]+metric_shear)
+              - sigma_term;
 
           }
 
           if (ppr->ncdm_fluid_approximation == ncdmfa_CLASS) {
 
             dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau)*y[idx+2]
-              +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*s_l[2]*(y[idx+1]+metric_ufa_class);
+              +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*s_l[2]*(y[idx+1]+metric_ufa_class)
+              - sigma_term;
 
           }
 
