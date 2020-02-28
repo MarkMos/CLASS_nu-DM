@@ -152,6 +152,12 @@ int thermodynamics_at_z(
     pvecthermo[pth->index_th_dg]=0.;
     pvecthermo[pth->index_th_ddg]=0.;
 
+    /* calculate the rate for DM-ur scattering */
+    /* dmu_urDM = 3/(8*Pi*G)*sigma_th/10^11eV*c^4/Mpc_over_m*(1+z)^(2+n_urDM)*u_urDM_0*Omega_DM*H_0^2 */
+    /* actually this expression is exact */
+    if (pth->has_coupling_urDM==_TRUE_)
+      pvecthermo[pth->index_th_dmu_urDM] = pow(1.+z, 2.+pth->n_urDM)*pth->u_urDM_0*3.*pba->H0*pba->H0/8./_PI_/_G_*pba->Omega0_nudm*pow(_c_,4)*_sigma_/1.e11/_eV_/_Mpc_over_m_;
+
     /* Calculate Tb */
     pvecthermo[pth->index_th_Tb] = pba->T_cmb*(1.+z);
 
@@ -367,6 +373,15 @@ int thermodynamics_init(
   class_test((pth->decay>0)&&(pba->has_cdm==_FALSE_),
              pth->error_message,
              "CDM decay effects require the presence of CDM!");
+
+             /* test nuDM scattering parameters */
+  class_test((pth->u_urDM_0<0.),
+       pth->error_message,
+       "DM-ur coupling strength can't be smaller than zero!");
+
+  class_test((pth->has_coupling_urDM==_TRUE_)&&(pba->K!=0),
+       pth->error_message,
+       "DM-ur coupling not implemented with non-flat curvature");
 
   /* tests in order to prevent segmentation fault in the following */
   class_test(_not4_ == 0.,
@@ -630,6 +645,15 @@ int thermodynamics_init(
                                                       pth->error_message),
                pth->error_message,
                pth->error_message);
+  }
+
+  /* compute dmu_urDM */
+  if(pth->has_coupling_urDM==_TRUE_){
+    for (index_tau=0; index_tau < pth->tt_size; index_tau++) {
+      pth->thermodynamics_table[index_tau*pth->th_size+pth->index_th_dmu_urDM]
+	= 3./8./_PI_/_G_*pow(pth->z_table[index_tau]+1.,2.+pth->n_urDM)*pba->Omega0_nudm*pba->H0*pba->H0*pth->u_urDM_0
+	*pow(_c_,4)*_sigma_/1.e11/_eV_/_Mpc_over_m_;
+    }
   }
 
   free(tau_table);
@@ -978,6 +1002,11 @@ int thermodynamics_indices(
 
   if (pth->compute_damping_scale == _TRUE_) {
     pth->index_th_r_d = index;
+    index++;
+  }
+
+  if(pth->has_coupling_urDM==_TRUE_){
+    pth->index_th_dmu_urDM = index;
     index++;
   }
 
@@ -3777,6 +3806,7 @@ int thermodynamics_output_titles(struct background * pba,
   class_store_columntitle(titles,"kappa' [Mpc^-1]",_TRUE_);
   //class_store_columntitle(titles,"kappa''",_TRUE_);
   //class_store_columntitle(titles,"kappa'''",_TRUE_);
+  class_store_columntitle(titles, "dmu_urDM [Mpc^-1]", pth->has_coupling_urDM);
   class_store_columntitle(titles,"exp(-kappa)",_TRUE_);
   class_store_columntitle(titles,"g [Mpc^-1]",_TRUE_);
   //class_store_columntitle(titles,"g'",_TRUE_);
@@ -3826,6 +3856,7 @@ int thermodynamics_output_data(struct background * pba,
     class_store_double(dataptr,pvecthermo[pth->index_th_dkappa],_TRUE_,storeidx);
     //class_store_double(dataptr,pvecthermo[pth->index_th_ddkappa],_TRUE_,storeidx);
     //class_store_double(dataptr,pvecthermo[pth->index_th_dddkappa],_TRUE_,storeidx);
+    class_store_double(dataptr,pvecthermo[pth->index_th_dmu_urDM],pth->has_coupling_urDM,storeidx);
     class_store_double(dataptr,pvecthermo[pth->index_th_exp_m_kappa],_TRUE_,storeidx);
     class_store_double(dataptr,pvecthermo[pth->index_th_g],_TRUE_,storeidx);
     //class_store_double(dataptr,pvecthermo[pth->index_th_dg],_TRUE_,storeidx);

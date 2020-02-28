@@ -589,6 +589,14 @@ int perturb_init(
     printf("Warning: the niv initial conditions in CLASS (and also in CAMB) should still be double-checked: if you want to do it and send feedback, you are welcome!\n");
   }
 
+  /** test that choices for urDM interactions make sense */
+if(pth->has_coupling_urDM==_TRUE_){
+  class_test(ppt->gauge == synchronous,
+       ppt->error_message,
+       "nu-DM coupling only available with neutonian gauge");
+
+      }
+
   if (ppt->has_tensors == _TRUE_) {
 
     ppt->evolve_tensor_ur = _FALSE_;
@@ -2719,7 +2727,7 @@ int perturb_solve(
   /* approximation scheme within previous interval: previous_approx[index_ap] */
   int * previous_approx;
 
-  int n_ncdm,is_early_enough;
+  int n_ncdm,is_early_enough, account_for_urDM_interactions; //added third urdm var.
 
   /* function pointer to ODE evolver and names of possible evolvers */
 
@@ -2817,6 +2825,19 @@ int perturb_solve(
   }
 
   //printf("solve tests done\n"); //debug
+  //////////////////////////////////////////////////
+  /** check if initial time is okay given given imposed
+      conditions on aH/dmu_nuDM **/
+  if(pth->has_coupling_urDM == _TRUE_ && ppr->has_urDM_initially == _TRUE_ && account_for_urDM_interactions == _TRUE_){
+    class_test(ppw->pvecback[pba->index_bg_a]*
+	       ppw->pvecback[pba->index_bg_H]/
+	       ppw->pvecthermo[pth->index_th_dmu_urDM] > ppr->start_large_k_at_aH_over_dmu_urDM,
+	       ppt->error_message, "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time before that at which the background has been integrated. You should increase 'start_large_k_at_aH_over_dmu_nuDM' up to at least %g, or decrease 'a_ini_over_a_today_default'\n",
+	       ppw->pvecback[pba->index_bg_a]*
+	       ppw->pvecback[pba->index_bg_H]/
+	       ppw->pvecthermo[pth->index_th_dmu_urDM]);
+  }
+//////////////////////////////////////////////////
 
   /* is at most the time at which sources must be sampled */
   tau_upper = ppt->tau_sampling[0];
@@ -2866,6 +2887,26 @@ int perturb_solve(
            ppr->start_large_k_at_tau_h_over_tau_k))
 
         is_early_enough = _FALSE_;
+
+        //////////////////////////////////////////////////
+      /* check if the ur interactions need to be taken into account */
+      account_for_urDM_interactions = _FALSE_;
+      if(pth->has_coupling_urDM==_TRUE_ && ppr->has_urDM_initially==_TRUE_){
+	if(ppw->pvecthermo[pth->index_th_dmu_urDM]/
+	   ppw->pvecback[pba->index_bg_H]/
+	   ppw->pvecback[pba->index_bg_a] > ppr->start_small_k_at_dmu_urDM_over_aH)
+	  account_for_urDM_interactions = _TRUE_;
+      }
+
+      /* check if integration starts early enough for nuDM initial conditions */
+      if(account_for_urDM_interactions == _TRUE_){
+	if(ppw->pvecback[pba->index_bg_H]*
+	   ppw->pvecback[pba->index_bg_a]/
+	   ppw->pvecthermo[pth->index_th_dmu_urDM]
+	   > ppr->start_large_k_at_aH_over_dmu_urDM)
+	  is_early_enough = _FALSE_;
+      }
+//////////////////////////////////////////////////
     }
 
     if (is_early_enough == _TRUE_)
@@ -4695,6 +4736,11 @@ int perturb_initial_conditions(struct precision * ppr,
   double velocity_tot;
   double s2_squared;
 
+  //////////////////////////////////////////////////
+  int account_for_urDM_interactions;
+  int urDM_thermo_index;
+//////////////////////////////////////////////////
+
   /** --> For scalars */
 
   if (_scalars_) {
@@ -4793,6 +4839,28 @@ int perturb_initial_conditions(struct precision * ppr,
 
     s2_squared = 1.-3.*pba->K/k/k;
 
+
+    //////////////////////////////////////////////////
+    /* If neutrinos interact with dark matter this supresses their shear and changes the initial
+       conditions.Here we check if we have to take this into account */
+    account_for_urDM_interactions = _FALSE_;
+    if (pth->has_coupling_urDM == _TRUE_ && ppr->has_urDM_initially == _TRUE_){
+
+      class_call(thermodynamics_at_z(pba,
+				     pth,
+				     1./ppw->pvecback[pba->index_bg_a]-1.,  /* redshift z=1/a-1 */
+				     pth->inter_normal,
+				     &urDM_thermo_index,
+				     ppw->pvecback,
+				     ppw->pvecthermo),
+		 pth->error_message,
+		 ppt->error_message);
+
+      if(ppw->pvecthermo[pth->index_th_dmu_urDM]/a_prime_over_a > ppr->start_small_k_at_dmu_urDM_over_aH)
+	account_for_urDM_interactions = _TRUE_;
+    }
+//////////////////////////////////////////////////
+
     /** - (b) starts by setting everything in synchronous gauge. If
         another gauge is needed, we will perform a gauge
         transformation below. */
@@ -4889,12 +4957,32 @@ int perturb_initial_conditions(struct precision * ppr,
 
         if (pba->has_dr == _TRUE_) delta_dr = delta_ur;
 
+        //////////////////////////////////////////////////
+	if (account_for_urDM_interactions == _TRUE_)
+	  {
+	    /* same as photon velocity */
+	    theta_ur = ppw->pv->y[ppw->pv->index_pt_theta_g];
+	    shear_ur = 0.;
+
+	    /* tighly-coupled dark matter */
+	    ppw->pv->y[ppw->pv->index_pt_theta_nudm] = theta_ur;
+	  }
+//////////////////////////////////////////////////
+
       }
 
       /* synchronous metric perturbation eta */
       //eta = ppr->curvature_ini * (1.-ktau_two/12./(15.+4.*fracnu)*(5.+4.*fracnu - (16.*fracnu*fracnu+280.*fracnu+325)/10./(2.*fracnu+15.)*tau*om)) /  s2_squared;
       //eta = ppr->curvature_ini * s2_squared * (1.-ktau_two/12./(15.+4.*fracnu)*(15.*s2_squared-10.+4.*s2_squared*fracnu - (16.*fracnu*fracnu+280.*fracnu+325)/10./(2.*fracnu+15.)*tau*om));
       eta = ppr->curvature_ini * (1.-ktau_two/12./(15.+4.*fracnu)*(5.+4.*s2_squared*fracnu - (16.*fracnu*fracnu+280.*fracnu+325)/10./(2.*fracnu+15.)*tau*om));
+
+      //////////////////////////////////////////////////
+            if (account_for_urDM_interactions == _TRUE_){
+      	/* ToDo: this is only the lowest order expression as in Ma/Bertschinger
+      	   Obtain higher order corrections. */
+      	eta = 1 - 0.5/18.*ktau_two;
+            }
+      //////////////////////////////////////////////////
 
     }
 
@@ -7819,6 +7907,9 @@ int perturb_derivs(double tau,
   /* for use with dcdm and dr */
   double f_dr, fprime_dr;
 
+  /* for use with nu-DM interactions */
+double S_urDM;
+
   /** - rename the fields of the input structure (just to avoid heavy notations) */
 
   pppaw = parameters_and_workspace;
@@ -7885,6 +7976,9 @@ int perturb_derivs(double tau,
   a2 = a*a;
   a_prime_over_a = pvecback[pba->index_bg_H] * a;
   R = 4./3. * pvecback[pba->index_bg_rho_g]/pvecback[pba->index_bg_rho_b];
+
+  /** background quantities for nu-DM interactions */
+  S_urDM = 4./3.*pvecback[pba->index_bg_rho_ur]/pvecback[pba->index_bg_rho_nudm];
 
   /** - Compute 'generalised cotK function of argument \f$ \sqrt{|K|}*\tau \f$, for closing hierarchy.
       (see equation 2.34 in arXiv:1305.3261): */
@@ -8165,6 +8259,9 @@ int perturb_derivs(double tau,
             dy[pv->index_pt_theta_nudm] += ppw->nudm_interaction_term[n_ncdm];
           }
         }
+        if(pth->has_coupling_urDM==_TRUE_ && ppw->approx[ppw->index_ap_rsa] == (int)rsa_off)
+	         dy[pv->index_pt_theta_nudm] += S_urDM*pvecthermo[pth->index_th_dmu_urDM]*(y[pv->index_pt_theta_ur]-y[pv->index_pt_theta_nudm]);
+
       }
     }
 
@@ -8310,6 +8407,9 @@ int perturb_derivs(double tau,
           // non-standard term, non-zero if ceff2_ur not 1/3
           -(1.-ppt->three_ceff2_ur)*a_prime_over_a*y[pv->index_pt_theta_ur];
 
+        if(pth->has_coupling_urDM==_TRUE_)
+  	       dy[pv->index_pt_theta_ur] += pvecthermo[pth->index_th_dmu_urDM]*(y[pv->index_pt_theta_nudm]-y[pv->index_pt_theta_ur]);
+
         if(ppw->approx[ppw->index_ap_ufa] == (int)ufa_off) {
 
           /** - -----> exact ur shear */
@@ -8320,21 +8420,36 @@ int perturb_derivs(double tau,
                  // non-standard term, non-zero if cvis2_ur not 1/3
                  -(1.-ppt->three_cvis2_ur)*(8./15.*(y[pv->index_pt_theta_ur]+metric_shear)));
 
+          if(pth->has_coupling_urDM==_TRUE_)
+       	    dy[pv->index_pt_shear_ur] += -0.5*ppt->alpha_urDM[2]*pvecthermo[pth->index_th_dmu_urDM]*y[pv->index_pt_shear_ur];
+
           /** - -----> exact ur l=3 */
           l = 3;
           dy[pv->index_pt_l3_ur] = k/(2.*l+1.)*
             (l*2.*s_l[l]*s_l[2]*y[pv->index_pt_shear_ur]-(l+1.)*s_l[l+1]*y[pv->index_pt_l3_ur+1]);
 
+          if(pth->has_coupling_urDM==_TRUE_)
+          	 dy[pv->index_pt_l3_ur] -= ppt->alpha_urDM[l]*pvecthermo[pth->index_th_dmu_urDM]*y[pv->index_pt_l3_ur];
+
+
           /** - -----> exact ur l>3 */
           for (l = 4; l < pv->l_max_ur; l++) {
             dy[pv->index_pt_delta_ur+l] = k/(2.*l+1)*
               (l*s_l[l]*y[pv->index_pt_delta_ur+l-1]-(l+1.)*s_l[l+1]*y[pv->index_pt_delta_ur+l+1]);
+
+          if(pth->has_coupling_urDM==_TRUE_)
+            dy[pv->index_pt_delta_ur+l] -= ppt->alpha_urDM[l]*pvecthermo[pth->index_th_dmu_urDM]*y[pv->index_pt_delta_ur+l];
+
           }
 
           /** - -----> exact ur lmax_ur */
           l = pv->l_max_ur;
           dy[pv->index_pt_delta_ur+l] =
             k*(s_l[l]*y[pv->index_pt_delta_ur+l-1]-(1.+l)*cotKgen*y[pv->index_pt_delta_ur+l]);
+
+          if(pth->has_coupling_urDM==_TRUE_)
+        	   dy[pv->index_pt_delta_ur+l] -= ppt->alpha_urDM[l]*pvecthermo[pth->index_th_dmu_urDM]*y[pv->index_pt_delta_ur+l];
+
 
         }
 

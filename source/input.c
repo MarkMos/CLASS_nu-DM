@@ -555,6 +555,24 @@ int input_init(
     }
   }
 
+  if(pth->has_coupling_urDM==_TRUE_ && input_verbose > 0){
+    printf(" -> ur-Dark Matter coupling enabled with the following parameters:\n");
+    printf("    u_urDM_0 = %f\n", pth->u_urDM_0);
+    printf("    n_urDM = %f\n", pth->n_urDM);
+    printf("    l_max_ur = %d\n", ppr->l_max_ur);
+    printf("    ufa_triggr = %f\n", ppr->ur_fluid_trigger_tau_over_tau_k);
+    printf("    alpha_nuDM = ");
+    for (i=0; i<ppr->l_max_ur; i++)
+      if (i<3 || ppt->alpha_urDM[i] !=ppt->alpha_urDM[i])
+	printf("%f, ", ppt->alpha_urDM[i]);
+    printf("...\n");
+    printf("    has_urDM_initially = %d\n", ppr->has_urDM_initially);
+    if (ppr->has_urDM_initially == _TRUE_){
+      printf("    small k threshold = %f\n", ppr->start_small_k_at_dmu_urDM_over_aH);
+      printf("    large k threshold = %f\n", ppr->start_large_k_at_aH_over_dmu_urDM);
+      }
+  }
+
   return _SUCCESS_;
 
 }
@@ -1432,6 +1450,18 @@ int input_read_parameters(
         class_stop(errmsg,"incomprehensible input '%s' for the field 'compute damping scale'",string1);
       }
     }
+  }
+
+  /** parameters for DM-ur scattering */
+  class_read_double("u_urDM_0", pth->u_urDM_0);
+  if (pth->u_urDM_0>0.){
+    pth->has_coupling_urDM = _TRUE_;
+    class_read_double("n_urDM", pth->n_urDM);
+    class_read_int("has_urDM_initially", ppr->has_urDM_initially);
+      if(ppr->has_urDM_initially){
+	class_read_double("start_small_k_at_dmu_urDM_over_aH", ppr->start_small_k_at_dmu_urDM_over_aH);
+	class_read_double("start_large_k_at_aH_over_dmu_urDM", ppr->start_large_k_at_aH_over_dmu_urDM);
+      }
   }
 
   /** (c) define which perturbations and sources should be computed, and down to which scale */
@@ -2787,6 +2817,34 @@ int input_read_parameters(
     pth->compute_cb2_derivatives = _TRUE_;
   }
 
+  /** this is a bit special: if nu-DM scattering is enabled initialize the list of hihger-order
+      multipole coefficients, set default to 1 and read in vaues */
+  if (pth->has_coupling_urDM==_TRUE_)
+    {
+      double * read_alpha;
+      parser_read_list_of_doubles(pfc,
+				  "alpha_urDM",
+				  &entries_read,
+				  &(read_alpha),
+				  &flag2,
+				  errmsg);
+      class_alloc(ppt->alpha_urDM,
+		  ppr->l_max_ur*sizeof(double),
+		  errmsg);
+      if(flag2==_TRUE_){
+	for(i=0; i<entries_read; i++)
+	  ppt->alpha_urDM[i] = read_alpha[i];
+	for(i=entries_read; i<ppr->l_max_ur; i++)
+	  ppt->alpha_urDM[i] = read_alpha[entries_read-1];
+      }
+      else{
+	for(i=0; i<ppr->l_max_ur; i++)
+	  ppt->alpha_urDM[i] = 1.;
+      }
+      free(read_alpha);
+    }
+  /** end of the ur-DM section */
+
   class_test(ppr->ur_fluid_trigger_tau_over_tau_k==ppr->radiation_streaming_trigger_tau_over_tau_k,
              errmsg,
              "please choose different values for precision parameters ur_fluid_trigger_tau_over_tau_k and radiation_streaming_trigger_tau_over_tau_k, in order to avoid switching two approximation schemes at the same time");
@@ -3066,6 +3124,10 @@ int input_default_params(
   pth->compute_cb2_derivatives=_FALSE_;
 
   pth->compute_damping_scale = _FALSE_;
+
+  pth->u_urDM_0=0.;
+  pth->n_urDM=0.;
+  pth->has_coupling_urDM=_FALSE_;
 
   /** - perturbation structure */
 

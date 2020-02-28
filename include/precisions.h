@@ -175,6 +175,11 @@ class_precision_parameter(start_sources_at_tau_c_over_tau_h,double,0.008) /**< s
 
 class_precision_parameter(tight_coupling_approximation,int,(int)compromise_CLASS) /**< method for tight coupling approximation */
 
+/** parameters for urDM initial conditions **/
+class_precision_parameter(has_urDM_initially,int,_TRUE_)
+class_precision_parameter(start_small_k_at_dmu_urDM_over_aH,double,1.0)
+class_precision_parameter(start_large_k_at_aH_over_dmu_urDM,double,1.0)
+
 class_precision_parameter(l_max_g,int,12)     /**< number of momenta in Boltzmann hierarchy for photon temperature (scalar), at least 4 */
 class_precision_parameter(l_max_pol_g,int,10) /**< number of momenta in Boltzmann hierarchy for photon polarization (scalar), at least 4 */
 class_precision_parameter(l_max_dr,int,17)   /**< number of momenta in Boltzmann hierarchy for decay radiation, at least 4 */

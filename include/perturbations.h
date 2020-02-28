@@ -99,6 +99,9 @@ struct perturbs
    *  parameters and the content of the 'precision', 'background' and
    *  'thermodynamics' structures) */
 
+   /* for the use with ur-DM interactions: list of higher order coefficients */
+  double * alpha_urDM;
+
   //@{
 
   short has_perturbations; /**< do we need to compute perturbations at all ? */
