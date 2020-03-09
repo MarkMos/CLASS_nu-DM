@@ -792,6 +792,7 @@ extern "C" {
   int perturb_initial_conditions(
                                  struct precision * ppr,
                                  struct background * pba,
+                                 struct thermo * pth,
                                  struct perturbs * ppt,
                                  int index_md,
                                  int index_ic,

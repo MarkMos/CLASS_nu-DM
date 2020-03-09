@@ -176,6 +176,7 @@ class_precision_parameter(start_sources_at_tau_c_over_tau_h,double,0.008) /**< s
 class_precision_parameter(tight_coupling_approximation,int,(int)compromise_CLASS) /**< method for tight coupling approximation */
 
 /** parameters for urDM initial conditions **/
+class_precision_parameter(use_urdm_initial_conditions,int,_FALSE_)
 class_precision_parameter(has_urDM_initially,int,_TRUE_)
 class_precision_parameter(start_small_k_at_dmu_urDM_over_aH,double,1.0)
 class_precision_parameter(start_large_k_at_aH_over_dmu_urDM,double,1.0)

@@ -590,7 +590,7 @@ int perturb_init(
   }
 
   /** test that choices for urDM interactions make sense */
-if(pth->has_coupling_urDM==_TRUE_){
+if(pth->has_coupling_urDM==_TRUE_ || pba->has_nudm){
   class_test(ppt->gauge == synchronous,
        ppt->error_message,
        "nu-DM coupling only available with neutonian gauge");
@@ -2827,7 +2827,7 @@ int perturb_solve(
   //printf("solve tests done\n"); //debug
   //////////////////////////////////////////////////
   /** check if initial time is okay given given imposed
-      conditions on aH/dmu_nuDM **/
+      conditions on aH/dmu_urDM **/
   if(pth->has_coupling_urDM == _TRUE_ && ppr->has_urDM_initially == _TRUE_ && account_for_urDM_interactions == _TRUE_){
     class_test(ppw->pvecback[pba->index_bg_a]*
 	       ppw->pvecback[pba->index_bg_H]/
@@ -2898,7 +2898,7 @@ int perturb_solve(
 	  account_for_urDM_interactions = _TRUE_;
       }
 
-      /* check if integration starts early enough for nuDM initial conditions */
+      /* check if integration starts early enough for urDM initial conditions */ //Markus delete?
       if(account_for_urDM_interactions == _TRUE_){
 	if(ppw->pvecback[pba->index_bg_H]*
 	   ppw->pvecback[pba->index_bg_a]/
@@ -4088,6 +4088,7 @@ int perturb_vector_init(
 
     class_call(perturb_initial_conditions(ppr,
                                           pba,
+                                          pth,
                                           ppt,
                                           index_md,
                                           index_ic,
@@ -4710,6 +4711,7 @@ int perturb_vector_free(
 
 int perturb_initial_conditions(struct precision * ppr,
                                struct background * pba,
+                               struct thermo * pth,
                                struct perturbs * ppt,
                                int index_md,
                                int index_ic,
@@ -4844,11 +4846,11 @@ int perturb_initial_conditions(struct precision * ppr,
     /* If neutrinos interact with dark matter this supresses their shear and changes the initial
        conditions.Here we check if we have to take this into account */
     account_for_urDM_interactions = _FALSE_;
-    if (pth->has_coupling_urDM == _TRUE_ && ppr->has_urDM_initially == _TRUE_){
+    if (pth->has_coupling_urDM == _TRUE_ && ppr->has_urDM_initially == _TRUE_ && ppr->use_urdm_initial_conditions == _TRUE_){
 
       class_call(thermodynamics_at_z(pba,
 				     pth,
-				     1./ppw->pvecback[pba->index_bg_a]-1.,  /* redshift z=1/a-1 */
+				     1./ppw->pvecback[pba->index_bg_a]-1.,  // redshift z=1/a-1
 				     pth->inter_normal,
 				     &urDM_thermo_index,
 				     ppw->pvecback,
@@ -4859,6 +4861,8 @@ int perturb_initial_conditions(struct precision * ppr,
       if(ppw->pvecthermo[pth->index_th_dmu_urDM]/a_prime_over_a > ppr->start_small_k_at_dmu_urDM_over_aH)
 	account_for_urDM_interactions = _TRUE_;
     }
+
+
 //////////////////////////////////////////////////
 
     /** - (b) starts by setting everything in synchronous gauge. If
@@ -4958,15 +4962,16 @@ int perturb_initial_conditions(struct precision * ppr,
         if (pba->has_dr == _TRUE_) delta_dr = delta_ur;
 
         //////////////////////////////////////////////////
-	if (account_for_urDM_interactions == _TRUE_)
+
+	if (account_for_urDM_interactions == _TRUE_ && ppr->use_urdm_initial_conditions == _TRUE_)
 	  {
-	    /* same as photon velocity */
+	    // same as photon velocity
 	    theta_ur = ppw->pv->y[ppw->pv->index_pt_theta_g];
 	    shear_ur = 0.;
-
-	    /* tighly-coupled dark matter */
+	    // tighly-coupled dark matter
 	    ppw->pv->y[ppw->pv->index_pt_theta_nudm] = theta_ur;
 	  }
+
 //////////////////////////////////////////////////
 
       }
@@ -4977,7 +4982,7 @@ int perturb_initial_conditions(struct precision * ppr,
       eta = ppr->curvature_ini * (1.-ktau_two/12./(15.+4.*fracnu)*(5.+4.*s2_squared*fracnu - (16.*fracnu*fracnu+280.*fracnu+325)/10./(2.*fracnu+15.)*tau*om));
 
       //////////////////////////////////////////////////
-            if (account_for_urDM_interactions == _TRUE_){
+            if (account_for_urDM_interactions == _TRUE_ && ppr->use_urdm_initial_conditions == _TRUE_){
       	/* ToDo: this is only the lowest order expression as in Ma/Bertschinger
       	   Obtain higher order corrections. */
       	eta = 1 - 0.5/18.*ktau_two;

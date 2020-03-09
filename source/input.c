@@ -561,7 +561,7 @@ int input_init(
     printf("    n_urDM = %f\n", pth->n_urDM);
     printf("    l_max_ur = %d\n", ppr->l_max_ur);
     printf("    ufa_triggr = %f\n", ppr->ur_fluid_trigger_tau_over_tau_k);
-    printf("    alpha_nuDM = ");
+    printf("    alpha_urDM = ");
     for (i=0; i<ppr->l_max_ur; i++)
       if (i<3 || ppt->alpha_urDM[i] !=ppt->alpha_urDM[i])
 	printf("%f, ", ppt->alpha_urDM[i]);

@@ -374,7 +374,7 @@ int thermodynamics_init(
              pth->error_message,
              "CDM decay effects require the presence of CDM!");
 
-             /* test nuDM scattering parameters */
+             /* test urDM scattering parameters */
   class_test((pth->u_urDM_0<0.),
        pth->error_message,
        "DM-ur coupling strength can't be smaller than zero!");
