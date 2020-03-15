@@ -739,7 +739,7 @@ if(pth->has_coupling_urDM==_TRUE_ || pba->has_nudm){
     /** - --> (c) loop over initial conditions and wavenumbers; for each of them, evolve perturbations and compute source functions with perturb_solve() */
 
     for (index_ic = 0; index_ic < ppt->ic_size[index_md]; index_ic++) {
-      printf("beginning initial condition\n");//debug
+      //printf("beginning initial condition\n");//debug
 
       if (ppt->perturbations_verbose > 1) {
         printf("Evolving ic %d/%d\n",index_ic+1,ppt->ic_size[index_md]);
@@ -799,7 +799,7 @@ if(pth->has_coupling_urDM==_TRUE_ || pba->has_nudm){
 
 
         } /* end of loop over wavenumbers */
-printf("solve done\n"); //debug
+//printf("solve done\n"); //debug
 #ifdef _OPENMP
         if (ppt->perturbations_verbose>1)
           printf("In %s: time spent in parallel region (loop over k's) = %e s for thread %d\n",
@@ -807,11 +807,11 @@ printf("solve done\n"); //debug
 #endif
 
       } /* end of parallel region */
-printf("parallel region done\n");//debug
+//printf("parallel region done\n");//debug
       if (abort == _TRUE_) return _FAILURE_;
 
     } /* end of loop over initial conditions */
-    printf("initial conditions done\n"); //debug
+    //printf("initial conditions done\n"); //debug
 
     abort = _FALSE_;
 
@@ -881,7 +881,7 @@ printf("parallel region done\n");//debug
     } /* end of loop over mode */
 
   }
-  printf("all done\n"); //debug
+  //printf("all done\n"); //debug
 
   return _SUCCESS_;
 }
