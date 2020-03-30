@@ -982,6 +982,21 @@ int input_read_parameters(
     /* Read interaction strength of each ncdm species: */
     class_read_list_of_doubles_or_default("u_ncdmdm",pba->u_ncdmdm,0.0,N_ncdm);
 
+    class_call(parser_read_string(pfc,"u_ncdmdm_scale",&string1,&flag1,errmsg),
+             errmsg,
+             errmsg);
+
+    if (flag1 == _TRUE_) {
+
+    if ((strstr(string1,"log") != NULL)) {
+
+               for (n = 0; n < N_ncdm; n++) {
+                 pba->u_ncdmdm[n] = pow(10,pba->u_ncdmdm[n]);
+               }
+
+             }
+    }
+
     for (n = 0; n < N_ncdm; n++) {
       if (pba->u_ncdmdm[n] > 0) {
         pba->has_ncdm_dm_interactions = _TRUE_;
