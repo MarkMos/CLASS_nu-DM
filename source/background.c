@@ -399,7 +399,7 @@ int background_functions(
       dp_dloga += (pseudo_p_ncdm - 5*p_ncdm);
 
       if (pba->has_nudm == _TRUE_) {
-        pvecback[pba->index_bg_A_nudm1+n_ncdm] = pba->u_ncdmdm[n_ncdm]*_sigma_*_Mpc_over_m_*9.47e5* rho_ncdm/_PI_;
+        pvecback[pba->index_bg_A_nudm1+n_ncdm] = a*pba->u_ncdmdm[n_ncdm]*_sigma_*_Mpc_over_m_*9.47e5* pvecback[pba->index_bg_rho_nudm]/_PI_;
         //if (pvecback[pba->index_bg_A_nudm1+n_ncdm]!=0) {
         //  printf("interaction strength = %f\n", pvecback[pba->index_bg_A_nudm1+n_ncdm]); //debug
         //}
