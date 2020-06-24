@@ -1141,7 +1141,7 @@ int perturb_indices_of_perturbs(
       }
 
       if (ppt->has_density_transfers == _TRUE_) {
-        printf("has density transfers\n");
+        //printf("has density transfers\n");
         ppt->has_lss = _TRUE_;
         ppt->has_source_delta_tot = _TRUE_;
         ppt->has_source_delta_g = _TRUE_;
@@ -4141,7 +4141,7 @@ int perturb_vector_init(
 
       if (pba->has_nudm == _TRUE_) {
         ppv->y[ppv->index_pt_delta_nudm] = ppw->pv->y[ppw->pv->index_pt_delta_nudm];
-	ppv->y[ppv->index_pt_theta_nudm] = ppw->pv->y[ppw->pv->index_pt_theta_nudm];
+	      ppv->y[ppv->index_pt_theta_nudm] = ppw->pv->y[ppw->pv->index_pt_theta_nudm];
       }
 
 
@@ -4905,7 +4905,7 @@ int perturb_initial_conditions(struct precision * ppr,
       }
 
       if (pba->has_nudm == _TRUE_){
-	ppw->pv->y[ppw->pv->index_pt_delta_nudm] = 3./4.*ppw->pv->y[ppw->pv->index_pt_delta_g];
+	      ppw->pv->y[ppw->pv->index_pt_delta_nudm] = 3./4.*ppw->pv->y[ppw->pv->index_pt_delta_g];
       }
 
       if (pba->has_dcdm == _TRUE_) {
@@ -5150,13 +5150,16 @@ int perturb_initial_conditions(struct precision * ppr,
       else if (pba->has_dcdm == _TRUE_)
         delta_cdm = ppw->pv->y[ppw->pv->index_pt_delta_dcdm];
       else if (pba->has_nudm == _TRUE_)
-	delta_cdm = ppw->pv->y[ppw->pv->index_pt_delta_nudm];
+	      delta_cdm = ppw->pv->y[ppw->pv->index_pt_delta_nudm];
       else
         delta_cdm=0.;
 
       // note: if there are no neutrinos, fracnu, delta_ur and theta_ur below will consistently be zero.
-
-      delta_tot = (fracg*ppw->pv->y[ppw->pv->index_pt_delta_g]+fracnu*delta_ur+rho_m_over_rho_r*(fracb*ppw->pv->y[ppw->pv->index_pt_delta_b]+fraccdm*delta_cdm))/(1.+rho_m_over_rho_r);
+      // TODO: MARKUS make fraccdm*delta_cdm consistent to include nudm
+//      if (pba->has_nudm == _TRUE_)
+//        delta_tot = (fracg*ppw->pv->y[ppw->pv->index_pt_delta_g]+fracnu*delta_ur+rho_m_over_rho_r*(fracb*ppw->pv->y[ppw->pv->index_pt_delta_b]+ppw->pvecback[pba->index_bg_rho_cdm]/rho_m*delta_cdm))/(1.+rho_m_over_rho_r);
+//      else
+        delta_tot = (fracg*ppw->pv->y[ppw->pv->index_pt_delta_g]+fracnu*delta_ur+rho_m_over_rho_r*(fracb*ppw->pv->y[ppw->pv->index_pt_delta_b]+fraccdm*delta_cdm))/(1.+rho_m_over_rho_r);
 
       velocity_tot = ((4./3.)*(fracg*ppw->pv->y[ppw->pv->index_pt_theta_g]+fracnu*theta_ur) + rho_m_over_rho_r*fracb*ppw->pv->y[ppw->pv->index_pt_theta_b])/(1.+rho_m_over_rho_r);
 
@@ -6199,13 +6202,13 @@ int perturb_total_stress_energy(
       ppw->delta_rho += ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_delta_nudm];
       if (ppt->gauge == newtonian)
         ppw->rho_plus_p_theta = ppw->rho_plus_p_theta + ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_theta_nudm];
-      ppw->rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_nudm];
+        ppw->rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_nudm];
       if (ppt->has_source_delta_m == _TRUE_) {
         delta_rho_m += ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_delta_nudm];
         rho_m += ppw->pvecback[pba->index_bg_rho_nudm];
       }
       if ((ppt->has_source_delta_m == _TRUE_) || (ppt->has_source_theta_m == _TRUE_)) {
-	rho_plus_p_theta_m += ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_theta_nudm];
+	      rho_plus_p_theta_m += ppw->pvecback[pba->index_bg_rho_nudm]*y[ppw->pv->index_pt_theta_nudm];
         rho_plus_p_m += ppw->pvecback[pba->index_bg_rho_nudm];
       }
     }
@@ -8551,8 +8554,8 @@ double S_urDM;
           //printf("ncdm before nudm\n"); //debug
           if (pba->has_nudm == _TRUE_){
             //printf("ncdm nudm interaction term = %f\n", ppw->nudm_interaction_term[n_ncdm]); //debug
-            dy[idx+1] -= ppw->nudm_interaction_term[n_ncdm];
-            sigma_term = ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
+            dy[idx+1] -= pvecback[pba->index_bg_rho_nudm]/(rho_ncdm_bg+p_ncdm_bg) *ppw->nudm_interaction_term[n_ncdm]; //
+            sigma_term = 0.9* ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
             * (1.52116185*pow(3*w_ncdm,0.50883507)-1.56421749*w_ncdm)* y[idx+2];
           }
           //printf("ncdm nudm int done\n"); //debug
