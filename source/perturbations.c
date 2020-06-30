@@ -542,7 +542,7 @@ int perturb_init(
 
   }
 
-  if (pba->has_nudm == _TRUE_ && pba->has_ncdm == _TRUE_) {
+  if (pba->has_ncdm_dm_interactions == _TRUE_ && pba->has_ncdm == _TRUE_) {
     class_test( (ppt->has_density_transfers == _FALSE_) && (ppt->has_velocity_transfers == _FALSE_) && (ppt->has_source_delta_m == _FALSE_),
                 ppt->error_message,
                 "when using nudm and ncdm, you must have density transfers, velocity transfers or source_delta_m")
@@ -590,7 +590,7 @@ int perturb_init(
   }
 
   /** test that choices for urDM interactions make sense */
-if(pth->has_coupling_urDM==_TRUE_ || pba->has_nudm){
+if(pth->has_coupling_urDM==_TRUE_ || pba->has_nudm == _TRUE_|| pba->has_ncdm_dm_interactions == _TRUE_){
   class_test(ppt->gauge == synchronous,
        ppt->error_message,
        "nu-DM coupling only available with neutonian gauge");
@@ -6064,6 +6064,8 @@ int perturb_total_stress_energy(
   double X, Y, Z, X_prime, Y_prime, Z_prime;
   double Gamma_fld, S, S_prime, theta_t, theta_t_prime, rho_plus_p_theta_fld_prime;
   double delta_p_b_over_rho_b;
+
+  //double test_term;
   //printf("stress_energy started\n"); //debug
   /** - wavenumber and scale factor related quantities */
 
@@ -6301,7 +6303,7 @@ int perturb_total_stress_energy(
 
 
           if ((ppt->has_source_delta_ncdm == _TRUE_) || (ppt->has_source_theta_ncdm == _TRUE_) || (ppt->has_source_delta_m == _TRUE_)) {
-            if (pba->has_nudm == _TRUE_) {
+            if (pba->has_ncdm_dm_interactions == _TRUE_) {
               ppw->nudm_interaction_term[n_ncdm] =
               rho_plus_p_ncdm/ppw->pvecback[pba->index_bg_rho_nudm]
               * ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
@@ -6334,6 +6336,8 @@ int perturb_total_stress_energy(
           delta_p_ncdm = 0.0;
           factor = pba->factor_ncdm[n_ncdm]*pow(pba->a_today/a,4);
 
+          //test_term = 0.0
+
           C_nudm_int = 0;
           divisor_int = 0;
           //printf("stress_energy ncdm not fluid before integration\n"); //debug
@@ -6349,11 +6353,15 @@ int perturb_total_stress_energy(
             rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
             delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
 
-            if (pba->has_nudm == _TRUE_) {
+            if (pba->has_ncdm_dm_interactions == _TRUE_) {
               C_nudm = ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]*q2/epsilon/epsilon;
+              //printf("Stress-Energy, no approx:\n");
+              //printf("C_nudm = %f, log(a) = %f, q= %f, n_ncdm = %i\n", C_nudm, log10(a), q, n_ncdm);
               C_nudm_int += q2*q*pba->w_ncdm[n_ncdm][index_q]*C_nudm*(y[idx+1]
                 + y[ppw->pv->index_pt_theta_nudm]/3./k * epsilon/q *pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]);
               divisor_int += q2*q*pba->w_ncdm[n_ncdm][index_q];
+
+              //test_term += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[ppw->pv->index_pt_theta_nudm]/3./k * epsilon/q *pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]);
 
             }
 
@@ -6361,6 +6369,8 @@ int perturb_total_stress_energy(
             //Jump to next momentum bin:
             idx+=(ppw->pv->l_max_ncdm[n_ncdm]+1);
           }
+
+          //printf("Test term = %f, theta_nudm = %f\n", test_term/divisor_int, y[ppw->pv->index_pt_theta_nudm]);
 
         //  printf("stress_energy ncdm not fluid integration done\n"); //debug
 
@@ -6385,7 +6395,7 @@ int perturb_total_stress_energy(
           ppw->rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
           //printf("stress_energy ncdm not fluid saving interaction term\n"); //debug
           if ((ppt->has_source_delta_ncdm == _TRUE_) || (ppt->has_source_theta_ncdm == _TRUE_) || (ppt->has_source_delta_m == _TRUE_)) {
-            if (pba->has_nudm == _TRUE_) {
+            if (pba->has_ncdm_dm_interactions == _TRUE_) {
               ppw->nudm_interaction_term[n_ncdm] =
               (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]
               *3./4. * C_nudm_int/divisor_int; // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
@@ -8262,9 +8272,9 @@ double S_urDM;
 
         dy[pv->index_pt_theta_nudm] = - a_prime_over_a*y[pv->index_pt_theta_nudm] + metric_euler; /* nudm velocity */
         //printf("derivs nudm before ncdm term\n"); //debug
-        if (pba->has_ncdm == _TRUE_) {
+        if (pba->has_ncdm_dm_interactions == _TRUE_) {
           for (n_ncdm=0; n_ncdm<pv->N_ncdm; n_ncdm++) {
-            dy[pv->index_pt_theta_nudm] += ppw->nudm_interaction_term[n_ncdm];
+            dy[pv->index_pt_theta_nudm] += 0.75*k*ppw->nudm_interaction_term[n_ncdm];
           }
         }
         if(pth->has_coupling_urDM==_TRUE_ && ppw->approx[ppw->index_ap_rsa] == (int)rsa_off)
@@ -8552,9 +8562,9 @@ double S_urDM;
             + metric_euler;
 
           //printf("ncdm before nudm\n"); //debug
-          if (pba->has_nudm == _TRUE_){
+          if (pba->has_ncdm_dm_interactions == _TRUE_){
             //printf("ncdm nudm interaction term = %f\n", ppw->nudm_interaction_term[n_ncdm]); //debug
-            dy[idx+1] -= pvecback[pba->index_bg_rho_nudm]/(rho_ncdm_bg+p_ncdm_bg) *ppw->nudm_interaction_term[n_ncdm]; //
+            dy[idx+1] -= pvecback[pba->index_bg_rho_nudm]/(rho_ncdm_bg+p_ncdm_bg) *0.75*k*ppw->nudm_interaction_term[n_ncdm]; //
             sigma_term = 0.9* ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
             * (1.52116185*pow(3*w_ncdm,0.50883507)-1.56421749*w_ncdm)* y[idx+2];
           }
@@ -8612,8 +8622,10 @@ double S_urDM;
             epsilon = sqrt(q*q+a2*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
             qk_div_epsilon = k*q/epsilon;
 
-            if (pba->has_nudm == _TRUE_) {
+            if (pba->has_ncdm_dm_interactions == _TRUE_) {
               C_nudm = pvecback[pba->index_bg_A_nudm1+n_ncdm]*q*q/epsilon/epsilon;
+              //printf("Derivs, no approx:\n");
+              //printf("C_nudm = %f, log(a) = %f, q= %f, n_ncdm = %i\n", C_nudm, log10(a), q, n_ncdm);
             }
             //printf("C_nudm done\n"); //debug
             /** - -----> ncdm density for given momentum bin */
@@ -8626,7 +8638,7 @@ double S_urDM;
             dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2])
               -epsilon*metric_euler/(3*q*k)*dlnf0_dlnq;
 
-              if (pba->has_nudm == _TRUE_) {
+              if (pba->has_ncdm_dm_interactions == _TRUE_) {
                 dy[idx+1] += -C_nudm*(y[idx+1] + y[pv->index_pt_theta_nudm]/3./k * epsilon/q * dlnf0_dlnq); // nudm interaction term
                 //printf("ncdm nudm interaction term (inintegrated) = %f\n", -C_nudm*(y[idx+1] + y[pv->index_pt_theta_nudm]/3./k * epsilon/q * dlnf0_dlnq)); //debug
               }
