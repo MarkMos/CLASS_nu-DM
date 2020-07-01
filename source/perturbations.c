@@ -6397,7 +6397,7 @@ int perturb_total_stress_energy(
           if ((ppt->has_source_delta_ncdm == _TRUE_) || (ppt->has_source_theta_ncdm == _TRUE_) || (ppt->has_source_delta_m == _TRUE_)) {
             if (pba->has_ncdm_dm_interactions == _TRUE_) {
               ppw->nudm_interaction_term[n_ncdm] =
-              (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]
+              0.75*k*(ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]
               *3./4. * C_nudm_int/divisor_int; // ADD this to nudm euler equation (do not subtract, sign is absorbed here)
               //printf("nudm interaction term defined as %f, calculated as %f\n",ppw->nudm_interaction_term[n_ncdm],
               //       (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])/ppw->pvecback[pba->index_bg_rho_nudm]*3./4. * C_nudm_int/divisor_int); //debug
@@ -8274,7 +8274,7 @@ double S_urDM;
         //printf("derivs nudm before ncdm term\n"); //debug
         if (pba->has_ncdm_dm_interactions == _TRUE_) {
           for (n_ncdm=0; n_ncdm<pv->N_ncdm; n_ncdm++) {
-            dy[pv->index_pt_theta_nudm] += 0.75*k*ppw->nudm_interaction_term[n_ncdm];
+            dy[pv->index_pt_theta_nudm] += ppw->nudm_interaction_term[n_ncdm];
           }
         }
         if(pth->has_coupling_urDM==_TRUE_ && ppw->approx[ppw->index_ap_rsa] == (int)rsa_off)
@@ -8564,7 +8564,7 @@ double S_urDM;
           //printf("ncdm before nudm\n"); //debug
           if (pba->has_ncdm_dm_interactions == _TRUE_){
             //printf("ncdm nudm interaction term = %f\n", ppw->nudm_interaction_term[n_ncdm]); //debug
-            dy[idx+1] -= pvecback[pba->index_bg_rho_nudm]/(rho_ncdm_bg+p_ncdm_bg) *0.75*k*ppw->nudm_interaction_term[n_ncdm]; //
+            dy[idx+1] -= pvecback[pba->index_bg_rho_nudm]/(rho_ncdm_bg+p_ncdm_bg) *ppw->nudm_interaction_term[n_ncdm]; //
             sigma_term = 0.9* ppw->pvecback[pba->index_bg_A_nudm1+n_ncdm]
             * (1.52116185*pow(3*w_ncdm,0.50883507)-1.56421749*w_ncdm)* y[idx+2];
           }
