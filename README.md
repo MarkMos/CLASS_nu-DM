@@ -1,7 +1,9 @@
 CLASS: Cosmic Linear Anisotropy Solving System  {#mainpage}
 ==============================================
+This is a modified version of CLASS, introducing interactions between dark matter and neutrinos, as described in the paper https://arxiv.org/abs/2011.04206
 
-Authors: Julien Lesgourgues and Thomas Tram
+
+Original CLASS authors: Julien Lesgourgues and Thomas Tram
 
 with several major inputs from other people, especially Benjamin
 Audren, Simon Prunet, Jesus Torrado, Miguel Zumalacarregui, Francesco
